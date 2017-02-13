@@ -87,5 +87,25 @@ namespace AbstractTermRewriter
 				}
 			}
 		}
+
+		public static class Operation
+		{
+			public static Element GetOpposite(Element operation)
+			{
+				switch (operation.Symbol)
+				{
+					case '+':
+						return new Element('-');
+					case '-':
+						return new Element('+');
+					case '*':
+						return new Element('/');
+					case '/':
+						return new Element('*');
+				}
+				throw new Exception("Not an operation element");
+			}
+
+		}
 	}
 }

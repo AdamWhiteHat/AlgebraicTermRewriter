@@ -30,5 +30,10 @@ namespace AbstractTermRewriter
 			Previous = ParentExpression.Elements[index - 1];
 			Previous.Next = this;
 		}
+
+		public bool IsType(ElementType type)
+		{
+			return (Type == type);
+		}
 	}
 }

@@ -12,20 +12,50 @@ namespace AbstractTermRewriter
 	public class Equation : ISentence
 	{
 		public Expression LeftHandSide { get; set; } = null;
+		public ComparativeType ComparativeOperator { get; private set; }
 		public Expression RightHandSide { get; set; } = null;
-		public List<Element> Elements { get { return LeftHandSide.Elements.Concat(RightHandSide.Elements).ToList(); } }
 
-		public EqualityType Equality { get; private set; }
-		public bool IsVariableIsolated { get; private set; } = false;
-		public bool IsFullyReduced { get { return LeftHandSide != null && RightHandSide != null ? LeftHandSide.IsFullyReduced && RightHandSide.IsFullyReduced : false; } }
-
-		public Equation(Expression lhs, EqualityType equality, Expression rhs)
+		private Equation(Expression lhs, ComparativeType comparative, Expression rhs)
 		{
 			LeftHandSide = lhs;
-			Equality = equality;
+			ComparativeOperator = comparative;
 			RightHandSide = rhs;
-			LeftHandSide.SideOfEqualitySymbol = EqualitySide.Left;
-			RightHandSide.SideOfEqualitySymbol = EqualitySide.Right;
+		}
+
+		public Equation(string input)
+		{
+			if (string.IsNullOrWhiteSpace(input))
+			{
+				throw new ArgumentException($"{nameof(input)} cannot be null, empty or white space.");
+			}
+
+			if (!input.Any(c => Types.Comparative.Contains(c)))
+			{
+				throw new ArgumentException("An Equation contains comparative symbols. You want an Expression.");
+			}
+
+			int index = input.IndexOfAny(Types.Comparative.ToArray());
+
+			string leftExpression = input.Substring(0, index);
+
+			string comparative = input.ElementAt(index).ToString();
+
+			if (Types.Comparative.Contains(input.ElementAt(index + 1)))
+			{
+				comparative += input.ElementAt(index + 1).ToString();
+				index += 1;
+			}
+
+			string rightExpression = input.Substring(index + 1);
+
+			ComparativeOperator = ConvertTo.ComparativeTypeEnum(comparative);
+			LeftHandSide = new Expression(leftExpression);
+			RightHandSide = new Expression(rightExpression);
+		}
+
+		public override string ToString()
+		{
+			return LeftHandSide.ToString() + ComparativeOperator.AsString() + RightHandSide.ToString();
 		}
 	}
 }

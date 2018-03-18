@@ -3,10 +3,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace AbstractTermRewriter
 {
-	public enum EqualityType
+	public enum TermType
+	{
+		Number,
+		Variable	
+	}
+
+	public enum ElementType
+	{
+		None,
+		Number,
+		Variable,
+		Operator,
+		Comparative
+	}
+
+	public enum ComparativeType
 	{
 		Equals,
 		LessThan,
@@ -15,97 +32,37 @@ namespace AbstractTermRewriter
 		GreaterThanOrEquals
 	}
 
-	public enum ElementType
-	{
-		Number,
-		Variable,
-		Operator,
-		Equality
-	}
-
 	public static class Types
 	{
 		public static readonly string Equality = "=";
-		public static readonly string Inequality = "=<>";
+		public static readonly string Inequality = "<>";
+		public static readonly string Comparative = Equality + Inequality;
 		public static readonly string Parenthesis = "()";
 		public static readonly string Operators = "+-*/^";
 		public static readonly string Numbers = "0123456789";
 		public static readonly string Variables = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		public static readonly string All = Inequality + Parenthesis + Numbers + Operators + Variables;
+		public static readonly string All = Comparative + Parenthesis + Numbers + Operators + Variables;
+	}
 
-		public static EqualityType GetEqualityType(string input)
+	public static class ConvertTo
+	{
+		public static ComparativeType ComparativeTypeEnum(string input)
 		{
-			if (input.Contains("<="))
-			{
-				return EqualityType.LessThanOrEquals;
-			}
-			else if (input.Contains(">="))
-			{
-				return EqualityType.GreaterThanOrEquals;
-			}
-			else if (input.Contains("<"))
-			{
-				return EqualityType.LessThan;
-			}
-			else if (input.Contains(">"))
-			{
-				return EqualityType.GreaterThan;
-			}
-			else if (input.Contains("="))
-			{
-				return EqualityType.Equals;
-			}
-			else
-			{
-				throw new ArgumentException("input not an (in)equality expression");
-			}
+			if (input == "=") return ComparativeType.Equals;
+			else if (input == ">") return ComparativeType.GreaterThan;
+			else if (input == "<") return ComparativeType.LessThan;
+			else if (input == "<=") return ComparativeType.LessThanOrEquals;
+			else if (input == ">=") return ComparativeType.GreaterThanOrEquals;
+			else throw new ArgumentException($"{nameof(input)} is not a ComparativeType.");
 		}
 
-		public static class Convert
+		public static ElementType ElementTypeEnum(char symbol)
 		{
-			public static ElementType ToElementType(char symbol)
-			{
-				if (Types.Operators.Contains(symbol))
-				{
-					return ElementType.Operator;
-				}
-				else if (Types.Numbers.Contains(symbol))
-				{
-					return ElementType.Number;
-				}
-				else if (Types.Variables.Contains(symbol))
-				{
-					return ElementType.Variable;
-				}
-				else if (Types.Inequality.Contains(symbol))
-				{
-					return ElementType.Equality;
-				}
-				else
-				{
-					throw new NotSupportedException(symbol.ToString());
-				}
-			}
-		}
-
-		public static class Operation
-		{
-			public static Element GetOpposite(Element operation)
-			{
-				switch (operation.Symbol)
-				{
-					case '+':
-						return new Element('-');
-					case '-':
-						return new Element('+');
-					case '*':
-						return new Element('/');
-					case '/':
-						return new Element('*');
-				}
-				throw new Exception("Not an operation element");
-			}
-
+			if (Types.Operators.Contains(symbol)) return ElementType.Operator;
+			else if (Types.Numbers.Contains(symbol)) return ElementType.Number;
+			else if (Types.Variables.Contains(symbol)) return ElementType.Variable;
+			else if (Types.Comparative.Contains(symbol)) return ElementType.Comparative;
+			else throw new ArgumentException($"{symbol} is not a ElementType.");
 		}
 	}
 }

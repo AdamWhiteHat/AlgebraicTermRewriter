@@ -4,12 +4,28 @@ namespace AbstractTermRewriter
 {
 	public interface ISentence
 	{
-		List<Element> Elements { get; }
+	}
+
+	public interface INumber : ITerm
+	{
+	}
+
+	public interface IVariable : ITerm
+	{
+	}
+
+	public interface ITerm : IElement
+	{
+	}
+
+	public interface IOperator : IElement
+	{
 	}
 
 	public interface IElement
 	{
-		char Symbol { get; }
+		string Symbol { get; }
 		ElementType Type { get; }
+		string ToString();
 	}
 }

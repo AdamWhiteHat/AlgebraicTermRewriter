@@ -1,143 +1,122 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace AbstractTermRewriter
 {
-	public enum EqualitySide
-	{
-		Left,
-		Right
-	}
-
-	// Examples of an expression:
-	//  5 * 3
-	//  5 * y
-
 	/// <summary>
-	/// An expression consists of a mathematical statement with or without variables, but does not contain an equality or inequality symbol.
-	/// 
+	/// An expression consists of a mathematical statement with or without variables, but does not contain an equality or inequality symbol.	/// 
 	/// </summary>
 	public class Expression : ISentence
 	{
-		public Element[] Operator { get { return Elements.Where(e => e.Type == ElementType.Operator).ToArray(); } }
-		public Element[] Constants { get { return Elements.Where(e => e.Type == ElementType.Number).ToArray(); } }
-		public Element[] Variables { get { return Elements.Where(e => e.Type == ElementType.Variable).ToArray(); } }
+		//public IElement[] Operators { get { return Elements.Where(e => e.Type == ElementType.Operator).ToArray(); } }
+		//public IElement[] Constants { get { return Elements.Where(e => e.Type == ElementType.Number).ToArray(); } }
+		//public IElement[] Variables { get { return Elements.Where(e => e.Type == ElementType.Variable).ToArray(); } }
 
-		public bool IsFullyReduced { get; private set; } = false;
-		public bool HasVariables { get { return Variables.Any(); } }
+		public List<IElement> Elements = new List<IElement>();
 
-		public EqualitySide SideOfEqualitySymbol { get; internal set; }
+		public int ElementCount { get { return Elements.Count; } }
 
-		public List<Element> Elements { get; private set; }
+		public bool IsSimplified { get { return ElementCount == 1; } }
+		public bool IsVariableIsolated { get { return (IsSimplified && Elements.First().Type == ElementType.Variable); } }
 
 		public Expression(string input)
 		{
-			if (string.IsNullOrWhiteSpace(input))
-			{
-				throw new ArgumentException();
-			}
-
-			foreach (char c in input)
-			{
-				AddElement(c);
-			}
+			Elements = ExpressionStringParser(input).ToList();
 		}
 
-		internal void AddElement(char c)
+		private static IElement[] ExpressionStringParser(string expression)
 		{
-			Element newElement = new Element(c);
-			AddElement(newElement);
-		}
-
-		internal void AddElement(Element newElement)
-		{
-			Elements.Add(newElement);
-			newElement.SetParentExpression(this);
-		}
-
-		public void Insert(Element[] elements)
-		{
-			if(elements == null || elements.Length != 2)
+			if (string.IsNullOrWhiteSpace(expression))
 			{
-				throw new ArgumentException();
+				throw new ArgumentException($"{nameof(expression)} cannot be null, empty or white space.");
 			}
 
-			bool operatorBefore = false;
-			if (elements[0].IsType(ElementType.Operator))
+			if (expression.Any(c => Types.Comparative.Contains(c)))
 			{
-				operatorBefore = true;
-			}
-			else if(elements[1].IsType(ElementType.Operator))
-			{
-				operatorBefore = false;
+				throw new ArgumentException("An expression contains no comparative symbols. You want an Equation.");
 			}
 
-			Element[] toAdd = new Element[] { };
+			Stack<char> stack = new Stack<char>(expression.Replace(" ", "").Reverse());
 
-			if(!operatorBefore)
+			List<IElement> result = new List<IElement>();
+
+			while (stack.Any())
 			{
-				toAdd = elements.Reverse().ToArray();
-			}
-			else
-			{
-				toAdd = elements.ToArray();
-			}
+				IElement newElement = null;
 
-			foreach (Element e in toAdd)
-			{
-				AddElement(e);
-			}
-		}
+				char c = stack.Pop();
 
-		public Element[] Extract(Element element)
-		{
-			return Extract(Elements.IndexOf(element));
-		}
+				if (Types.Numbers.Contains(c))
+				{
+					string value = c.ToString();
+					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
+					{
+						c = stack.Pop();
+						value += c;
+					}
 
-		public Element[] Extract(int elementIndex)
-		{
-			if (elementIndex < 1 || elementIndex > Elements.Count - 1)
-			{
-				throw new IndexOutOfRangeException();
-			}
+					newElement = new Number(int.Parse(value));
+				}
+				else if (Types.Operators.Contains(c))
+				{
+					newElement = new Operator(c);
+				}
+				else if (Types.Variables.Contains(c))
+				{
+					newElement = new Variable(c);
+				}
 
-			int operationIndex = -1;
-
-			if (elementIndex == 0)
-			{
-				operationIndex = 1;
-			}
-			else
-			{
-				operationIndex = elementIndex - 1;
-			}
-
-			List<Element> result = new List<Element>();
-
-			Element operation = Elements[operationIndex];
-			Element element = Elements[elementIndex];
-
-			Elements.Remove(operation);
-			Elements.Remove(element);
-
-			operation = Types.Operation.GetOpposite(operation);
-
-			result.Add(element);
-
-			if (operationIndex < elementIndex)
-			{
-				result.Insert(0, operation);
-			}
-			else
-			{
-				result.Add(element);
+				result.Add(newElement);
 			}
 
 			return result.ToArray();
+		}
+
+
+
+		public IElement ElementAt(int index)
+		{
+			if (index < 0 || index > ElementCount - 1)
+			{
+				return Element.None;
+			}
+
+			return Elements.ElementAt(index);
+		}
+
+		public bool Contains(ElementType type)
+		{
+			return Elements.Select(e => e.Type).Contains(type);
+		}
+
+		internal void AddElement(IElement newElement)
+		{
+			Elements.Add(newElement);
+		}
+
+		public void Insert(TermOperatorPair pair)
+		{
+			if (pair == null) throw new ArgumentNullException();
+
+			if (pair.Orientation == InsertOrientation.Right)
+			{
+				Elements.Add(pair.Operator);
+				Elements.Add(pair.Term);
+			}
+			else
+			{
+				Elements.Insert(0, pair.Operator);
+				Elements.Insert(0, pair.Term);
+			}
+		}
+
+		public override string ToString()
+		{
+			return string.Join(" ", Elements.Select(e => e.Symbol));
 		}
 	}
 }

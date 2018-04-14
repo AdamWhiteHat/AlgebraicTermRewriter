@@ -56,7 +56,7 @@ namespace AbstractTermRewriter
 				}
 			}
 
-			return result.ToString();
+			return result.ToString().TrimEnd();
 		}
 	}
 }

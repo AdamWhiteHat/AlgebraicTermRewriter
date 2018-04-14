@@ -8,6 +8,7 @@ namespace AbstractTermRewriter
 {
 	public class Variable : IVariable
 	{
+		public char Value { get; private set; }
 		public string Symbol { get; }
 		public ElementType Type { get { return ElementType.Variable; } }
 
@@ -17,6 +18,7 @@ namespace AbstractTermRewriter
 			{
 				throw new ArgumentException($"{nameof(symbol)} does not match any of the valid variable symbols.");
 			}
+			Value = symbol;
 			Symbol = symbol.ToString();
 		}
 

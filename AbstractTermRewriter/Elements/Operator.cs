@@ -8,14 +8,17 @@ namespace AbstractTermRewriter
 {
 	public class Operator : IOperator
 	{
+		public char Value { get; private set; }
 		public string Symbol { get; private set; }
 		public ElementType Type { get { return ElementType.Operator; } }
 		public Operator(char symbol)
 		{
+			
 			if (!Types.Operators.Contains(symbol))
 			{
 				throw new ArgumentException($"{nameof(symbol)} does not match any of the valid operator symbols.");
 			}
+			Value = symbol;
 			Symbol = symbol.ToString(); ;
 		}
 

@@ -181,6 +181,10 @@ namespace RewriterTests
 		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }
 
 		private TestContext testContextInstance;
+	
 		public TestContext TestContext { get { return testContextInstance; } set { testContextInstance = value; } }
+
 	}
+
+
 }

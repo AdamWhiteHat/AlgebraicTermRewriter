@@ -8,6 +8,12 @@ using System.ComponentModel;
 
 namespace AbstractTermRewriter
 {
+	public enum SideOfEquation
+	{
+		Left,
+		Right
+	}
+
 	public enum TermType
 	{
 		Number,

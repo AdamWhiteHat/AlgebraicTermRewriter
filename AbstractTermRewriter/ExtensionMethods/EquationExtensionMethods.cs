@@ -8,10 +8,15 @@ namespace AbstractTermRewriter
 {
 	public static class EquationExtensionMethods
 	{
-		public static void Substitute(this Equation source, IVariable variable, INumber value)
+		public static int GetDistinctVariableCount(this Equation source)
 		{
-			source.LeftHandSide.Substitute(variable, value);
-			source.RightHandSide.Substitute(variable, value);
+			return source.LeftHandSide.Variables.Concat(source.RightHandSide.Variables).Distinct().Count();
+		}
+
+		public static void Substitute(this Equation source, IVariable variable, Element[] expression)
+		{
+			source.LeftHandSide.Substitute(variable, expression);
+			source.RightHandSide.Substitute(variable, expression);
 		}
 
 		public static void ApplyToBothSides(this Equation source, TermOperatorPair pair)
@@ -23,6 +28,32 @@ namespace AbstractTermRewriter
 		public static bool OnlyArithmeticElements(this Equation source)
 		{
 			return source.LeftHandSide.OnlyArithmeticElements() && source.RightHandSide.OnlyArithmeticElements();
+		}
+
+		public static void EnsureVariableOnLeft(this Equation source)
+		{
+			Expression left = source.LeftHandSide;
+			Expression right = source.RightHandSide;
+
+			bool leftHasVariables = left.Variables.Any();
+			bool rightHasVariables = right.Variables.Any();
+
+			if (leftHasVariables && rightHasVariables)
+			{
+				return;
+			}
+
+			if (leftHasVariables)
+			{
+				return;
+			}
+
+			if (rightHasVariables)
+			{
+				Expression temp = right;
+				source.RightHandSide = left;
+				source.LeftHandSide = temp;
+			}
 		}
 
 		public static Expression PickExpression(this Equation source)

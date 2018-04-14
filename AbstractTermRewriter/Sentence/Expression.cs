@@ -12,16 +12,34 @@ namespace AbstractTermRewriter
 	/// </summary>
 	public class Expression : ISentence
 	{
-		//public IElement[] Operators { get { return Elements.Where(e => e.Type == ElementType.Operator).ToArray(); } }
-		//public IElement[] Constants { get { return Elements.Where(e => e.Type == ElementType.Number).ToArray(); } }
-		//public IElement[] Variables { get { return Elements.Where(e => e.Type == ElementType.Variable).ToArray(); } }
+		public static Expression Empty = new Expression();
+		public IEnumerable<IOperator> Operators { get { return Elements.Where(e => e.Type == ElementType.Operator).Select(e => (e as IOperator)); } }
+		public IEnumerable<INumber> Numbers { get { return Elements.Where(e => e.Type == ElementType.Number).Select(e => (e as INumber)); } }
+		public IEnumerable<IVariable> Variables { get { return Elements.Where(e => e.Type == ElementType.Variable).Select(e => (e as IVariable)); } }
+		public IEnumerable<ITerm> Terms { get { return Elements.Where(e => e.Type == ElementType.Number || e.Type == ElementType.Variable).Select(e => (e as ITerm)); } }
 
 		public List<IElement> Elements = new List<IElement>();
 
 		public int ElementCount { get { return Elements.Count; } }
 
-		public bool IsSimplified { get { return ElementCount == 1; } }
+		public bool IsSimplified { get { return ElementCount == 1 || ElementCount == 2; } }
 		public bool IsVariableIsolated { get { return (IsSimplified && Elements.First().Type == ElementType.Variable); } }
+
+		public int Value
+		{
+			get
+			{
+				if (!IsSimplified) throw new Exception("Expression is not a single value.");
+				if (!(Elements.First() is INumber)) throw new Exception("Expression is not a numeric value.");
+				else return (Elements.Single() as INumber).Value;
+			}
+		}
+
+
+		private Expression()
+		{
+			Elements = new List<IElement>();
+		}
 
 		public Expression(string input)
 		{
@@ -77,7 +95,6 @@ namespace AbstractTermRewriter
 		}
 
 
-
 		public IElement ElementAt(int index)
 		{
 			if (index < 0 || index > ElementCount - 1)
@@ -86,11 +103,6 @@ namespace AbstractTermRewriter
 			}
 
 			return Elements.ElementAt(index);
-		}
-
-		public bool Contains(ElementType type)
-		{
-			return Elements.Select(e => e.Type).Contains(type);
 		}
 
 		internal void AddElement(IElement newElement)
@@ -102,15 +114,15 @@ namespace AbstractTermRewriter
 		{
 			if (pair == null) throw new ArgumentNullException();
 
-			if (pair.Orientation == InsertOrientation.Right)
-			{
-				Elements.Add(pair.Operator);
-				Elements.Add(pair.Term);
-			}
-			else
+			if (pair.Orientation == InsertOrientation.Left)
 			{
 				Elements.Insert(0, pair.Operator);
 				Elements.Insert(0, pair.Term);
+			}
+			else
+			{
+				Elements.Add(pair.Operator);
+				Elements.Add(pair.Term);
 			}
 		}
 

@@ -11,6 +11,7 @@ namespace AbstractTermRewriter
 	/// </summary>
 	public class Equation : ISentence
 	{
+		public static Equation Empty = new Equation(Expression.Empty, ComparativeType.Equals, Expression.Empty);
 		public Expression LeftHandSide { get; set; } = null;
 		public ComparativeType ComparativeOperator { get; private set; }
 		public Expression RightHandSide { get; set; } = null;

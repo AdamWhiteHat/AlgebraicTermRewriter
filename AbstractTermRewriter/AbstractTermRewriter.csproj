@@ -59,11 +59,10 @@
     <Compile Include="Sentence\Equation.cs" />
     <Compile Include="Sentence\Expression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Solver\Solver.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Solver\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -55,6 +55,7 @@
     <Compile Include="InfixNotationEvaluator\InfixToPostfixConverter.cs" />
     <Compile Include="InfixNotationEvaluator\ParserTokens.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="Parser\MathParser.cs" />
     <Compile Include="Sentence\Problem.cs" />
     <Compile Include="Sentence\Equation.cs" />
     <Compile Include="Sentence\Expression.cs" />

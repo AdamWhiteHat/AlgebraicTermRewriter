@@ -10,7 +10,7 @@ namespace AbstractTermRewriter
 	/// <summary>
 	/// An expression consists of a mathematical statement with or without variables, but does not contain an equality or inequality symbol.	/// 
 	/// </summary>
-	public class Expression : ISentence
+	public class Expression : ISentence, ICloneable<Expression>
 	{
 		public static Expression Empty = new Expression();
 		public IEnumerable<IOperator> Operators { get { return Elements.Where(e => e.Type == ElementType.Operator).Select(e => (e as IOperator)); } }
@@ -35,65 +35,15 @@ namespace AbstractTermRewriter
 			}
 		}
 
-
 		private Expression()
 		{
 			Elements = new List<IElement>();
 		}
 
-		public Expression(string input)
+		public Expression(IElement[] elements)
 		{
-			Elements = ExpressionStringParser(input).ToList();
+			Elements = elements.ToList();
 		}
-
-		private static IElement[] ExpressionStringParser(string expression)
-		{
-			if (string.IsNullOrWhiteSpace(expression))
-			{
-				throw new ArgumentException($"{nameof(expression)} cannot be null, empty or white space.");
-			}
-
-			if (expression.Any(c => Types.Comparative.Contains(c)))
-			{
-				throw new ArgumentException("An expression contains no comparative symbols. You want an Equation.");
-			}
-
-			Stack<char> stack = new Stack<char>(expression.Replace(" ", "").Reverse());
-
-			List<IElement> result = new List<IElement>();
-
-			while (stack.Any())
-			{
-				IElement newElement = null;
-
-				char c = stack.Pop();
-
-				if (Types.Numbers.Contains(c))
-				{
-					string value = c.ToString();
-					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
-					{
-						c = stack.Pop();
-						value += c;
-					}
-
-					newElement = new Number(int.Parse(value));
-				}
-				else if (Types.Operators.Contains(c))
-				{
-					newElement = new Operator(c);
-				}
-				else if (Types.Variables.Contains(c))
-				{
-					newElement = new Variable(c);
-				}
-
-				result.Add(newElement);
-			}
-
-			return result.ToArray();
-		}
-
 
 		public IElement ElementAt(int index)
 		{
@@ -124,6 +74,11 @@ namespace AbstractTermRewriter
 				Elements.Add(pair.Operator);
 				Elements.Add(pair.Term);
 			}
+		}
+
+		public Expression Clone()
+		{
+			return new Expression(this.Elements.ToArray());
 		}
 
 		public override string ToString()

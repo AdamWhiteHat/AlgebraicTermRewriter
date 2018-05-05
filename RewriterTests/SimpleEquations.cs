@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AbstractTermRewriter;
 
 namespace RewriterTests
@@ -22,24 +21,24 @@ namespace RewriterTests
 
 
 			TestCombineArithmeticHelper(EquationA);
-			TestCombineArithmeticHelper(EquationB);			
-			TestCombineArithmeticHelper(EquationC);			
+			TestCombineArithmeticHelper(EquationB);
+			TestCombineArithmeticHelper(EquationC);
 			TestCombineArithmeticHelper(EquationD);
 
 			Print("---------");
-			
+
 			string[] EquationP = new string[] { "2/y=6", "y = 0" };
 			string[] EquationQ = new string[] { "6=2/y", "y = 0" };
-			string[] EquationR = new string[] { "y/2=6", "y = 12" };			
+			string[] EquationR = new string[] { "y/2=6", "y = 12" };
 			string[] EquationS = new string[] { "6=y/2", "y = 12" };
 			TestCombineArithmeticHelper(EquationP);
 			TestCombineArithmeticHelper(EquationQ);
 			TestCombineArithmeticHelper(EquationR);
 			TestCombineArithmeticHelper(EquationS);
 
-			
+
 			Print("---------");
-			
+
 
 			string[] EquationW = new string[] { "2*x=8", "x = 4" };
 			string[] EquationX = new string[] { "x/2=8", "x = 16" };
@@ -62,8 +61,8 @@ namespace RewriterTests
 			TestCombineArithmeticHelper(Equation4);
 
 			Print("---------");
-			
-	
+
+
 		}
 
 		private void TestCombineArithmeticHelper(string[] equation)
@@ -73,7 +72,7 @@ namespace RewriterTests
 			Solver solver = new Solver(prob, Print);
 			solver.Solve();
 
-			string resultExpected = equation[1].Replace(" ","");			
+			string resultExpected = equation[1].Replace(" ", "");
 			string resultActual = "";
 
 			if (solver.Solutions.Any())

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace AbstractTermRewriter
@@ -19,21 +18,7 @@ namespace AbstractTermRewriter
 			if (statements == null || statements.Length < 1) throw new ArgumentException("You must pass at least one statement.");
 
 			_statements = statements;
-			Statements = _statements.Select(s => Parse(s)).ToList();
-		}
-		
-		public static ISentence Parse(string input)
-		{
-			if (string.IsNullOrWhiteSpace(input)) throw new ArgumentException();
-
-			if (input.Any(c => Types.Comparative.Contains(c)))
-			{
-				return (ISentence)new Equation(input);
-			}
-			else
-			{
-				return (ISentence)new Expression(input);
-			}
+			Statements = _statements.Select(s => MathParser.ParseSentence(s)).ToList();
 		}
 
 		public override string ToString()

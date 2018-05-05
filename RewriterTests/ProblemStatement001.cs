@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Linq;
-using AbstractTermRewriter;
-using Microsoft.VisualStudio.TestTools;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using AbstractTermRewriter;
 
 namespace RewriterTests
 {
 	[TestClass]
 	public class ProblemStatement001
 	{
-		public Expression Clone(Expression exp)
-		{
-			return new Expression(exp.ToString());
-		}
-
-
 		static string[] problemStatement =
 			   new string[]
 			   {
@@ -77,9 +70,9 @@ namespace RewriterTests
 		[TestMethod]
 		public void TestExtractElement()
 		{
-			Expression e1 = Clone(exp);
-			Expression e2 = Clone(exp);
-			Expression e3 = Clone(exp);
+			Expression e1 = exp.Clone();
+			Expression e2 = exp.Clone();
+			Expression e3 = exp.Clone();
 
 
 			Print(ExtractInfo(e1, 0));
@@ -181,7 +174,7 @@ namespace RewriterTests
 		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }
 
 		private TestContext testContextInstance;
-	
+
 		public TestContext TestContext { get { return testContextInstance; } set { testContextInstance = value; } }
 
 	}

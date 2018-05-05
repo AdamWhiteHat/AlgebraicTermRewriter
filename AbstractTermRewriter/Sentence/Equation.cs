@@ -9,49 +9,26 @@ namespace AbstractTermRewriter
 	/// <summary>
 	/// An equation consists of two expressions with an equality or inequality symbol between them 
 	/// </summary>
-	public class Equation : ISentence
+	public class Equation : ISentence, ICloneable<Equation>
 	{
 		public static Equation Empty = new Equation(Expression.Empty, ComparativeType.Equals, Expression.Empty);
 		public Expression LeftHandSide { get; set; } = null;
 		public ComparativeType ComparativeOperator { get; private set; }
 		public Expression RightHandSide { get; set; } = null;
 
-		private Equation(Expression lhs, ComparativeType comparative, Expression rhs)
+		public Equation(Expression leftExpression, ComparativeType comparative, Expression rightExpression)
 		{
-			LeftHandSide = lhs;
+			LeftHandSide = leftExpression;
 			ComparativeOperator = comparative;
-			RightHandSide = rhs;
+			RightHandSide = rightExpression;
 		}
 
-		public Equation(string input)
+		public Equation Clone()
 		{
-			if (string.IsNullOrWhiteSpace(input))
-			{
-				throw new ArgumentException($"{nameof(input)} cannot be null, empty or white space.");
-			}
+			Expression lhs = LeftHandSide.Clone();
+			Expression rhs = RightHandSide.Clone();
 
-			if (!input.Any(c => Types.Comparative.Contains(c)))
-			{
-				throw new ArgumentException("An Equation contains comparative symbols. You want an Expression.");
-			}
-
-			int index = input.IndexOfAny(Types.Comparative.ToArray());
-
-			string leftExpression = input.Substring(0, index);
-
-			string comparative = input.ElementAt(index).ToString();
-
-			if (Types.Comparative.Contains(input.ElementAt(index + 1)))
-			{
-				comparative += input.ElementAt(index + 1).ToString();
-				index += 1;
-			}
-
-			string rightExpression = input.Substring(index + 1);
-
-			ComparativeOperator = ConvertTo.ComparativeTypeEnum(comparative);
-			LeftHandSide = new Expression(leftExpression);
-			RightHandSide = new Expression(rightExpression);
+			return new Equation(lhs, ComparativeOperator, rhs);
 		}
 
 		public override string ToString()

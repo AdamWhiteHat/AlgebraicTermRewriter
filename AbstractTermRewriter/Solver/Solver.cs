@@ -132,13 +132,12 @@ namespace AbstractTermRewriter
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
 
-
-
+		
 		private static void IsolateSingleVariable(Equation eq)
 		{
 			Expression from = null;
 			Expression to = null;
-					
+
 			while (true)
 			{
 				eq.EnsureVariableOnLeft();
@@ -159,7 +158,7 @@ namespace AbstractTermRewriter
 
 				if (from.ElementCount - 1 == extractIndex)
 				{
-					op = from.LeftOfElement(toExtract);					
+					op = from.LeftOfElement(toExtract);
 				}
 				else
 				{
@@ -253,19 +252,14 @@ namespace AbstractTermRewriter
 			{
 				case ComparativeType.Equals:
 					return left.Value == right.Value;
-					break;
 				case ComparativeType.GreaterThan:
 					return left.Value > right.Value;
-					break;
 				case ComparativeType.LessThan:
 					return left.Value < right.Value;
-					break;
 				case ComparativeType.GreaterThanOrEquals:
 					return left.Value >= right.Value;
-					break;
 				case ComparativeType.LessThanOrEquals:
 					return left.Value <= right.Value;
-					break;
 				default:
 					throw new Exception();
 			}
@@ -274,9 +268,6 @@ namespace AbstractTermRewriter
 
 
 		/* EXPRESSIONS */
-
-
-
 
 		private void SolveExpression(Expression ex)
 		{

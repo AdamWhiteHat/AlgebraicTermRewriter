@@ -57,9 +57,9 @@
     <Compile Include="SystemsOfEquations.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AbstractTermRewriter\AbstractTermRewriter.csproj">
+    <ProjectReference Include="..\AlgebraicTermRewriter\AlgebraicTermRewriter.csproj">
       <Project>{372dae8c-a479-4db5-8acd-bf98e372b857}</Project>
-      <Name>AbstractTermRewriter</Name>
+      <Name>AlgebraicTermRewriter</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

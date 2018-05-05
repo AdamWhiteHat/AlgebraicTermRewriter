@@ -31,29 +31,29 @@ namespace AlgebraicTermRewriter
 	}
 
 	/// <summary>
-	/// A ITerm is an IElement that is either an INumber or an IVariable,
-	/// but is not an IOperator, which is the third type of IElement.
+	/// A ITerm is an IToken that is either an INumber or an IVariable,
+	/// but is not an IOperator, which is the third type of IToken.
 	/// </summary>
-	public interface ITerm : IElement
+	public interface ITerm : IToken
 	{
 	}
 
 	/// <summary>
 	/// A mathematical operator such as addition, subtraction, multiplication or division.
 	/// </summary>
-	public interface IOperator : IElement
+	public interface IOperator : IToken
 	{
-		char Value { get; }
+		char Symbol { get; }
 	}
 
 	/// <summary>
-	/// The most basic element in a mathematical sentence.
+	/// The most basic token in a mathematical sentence.
 	/// Could also be thought of as a Token, from a parsing perspective.
 	/// </summary>
-	public interface IElement
+	public interface IToken
 	{
-		string Symbol { get; }
-		ElementType Type { get; }
+		string Contents { get; }
+		TokenType Type { get; }
 		string ToString();
 	}
 

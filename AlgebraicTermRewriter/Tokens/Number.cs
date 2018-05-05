@@ -9,8 +9,8 @@ namespace AlgebraicTermRewriter
 	public class Number : INumber
 	{
 		public int Value { get; private set; }
-		public string Symbol { get { return Value.ToString(); } }
-		public ElementType Type { get { return ElementType.Number; } }
+		public string Contents { get { return Value.ToString(); } }
+		public TokenType Type { get { return TokenType.Number; } }
 
 		public Number(int value)
 		{
@@ -19,7 +19,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			return Symbol;
+			return Contents;
 		}
 	}
 }

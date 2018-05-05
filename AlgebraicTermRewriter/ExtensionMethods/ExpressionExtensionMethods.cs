@@ -8,64 +8,64 @@ namespace AlgebraicTermRewriter
 {
 	public static class ExpressionExtensionMethods_Checks
 	{
-		public static void CombineArithmeticElements(this Expression source)
+		public static void CombineArithmeticTokens(this Expression source)
 		{
-			Tuple<int, int> range = source.Elements.GetLongestArithmeticRange();
+			Tuple<int, int> range = source.Tokens.GetLongestArithmeticRange();
 
 			if (range == null)
 			{
 				return;
 			}
 
-			List<IElement> arithmeticExpression = source.Elements.GetRange(range.Item1, range.Item2);
+			List<IToken> arithmeticExpression = source.Tokens.GetRange(range.Item1, range.Item2);
 
-			string toEvaluate = string.Join("", arithmeticExpression.Select(e => e.Symbol));
+			string toEvaluate = string.Join("", arithmeticExpression.Select(e => e.Contents));
 
 			INumber newValue = new Number(InfixNotationEvaluator.Evaluate(toEvaluate));
 
-			source.Elements.RemoveRange(range.Item1, range.Item2);
+			source.Tokens.RemoveRange(range.Item1, range.Item2);
 
 			int insertIndex = range.Item1 == 0 ? 0 : range.Item1 - 1;
 
 			if (newValue.Value == 0)
 			{
-				if (source.ElementCount == 0)
+				if (source.TokenCount == 0)
 				{
-					source.Elements.Insert(0, new Number(0));
+					source.Tokens.Insert(0, new Number(0));
 					return;
 				}
-				IElement op = source.ElementAt(insertIndex);
-				if (op.Symbol != "*")
+				IToken op = source.TokenAt(insertIndex);
+				if (op.Contents != "*")
 				{
-					source.Elements.RemoveAt(insertIndex);
+					source.Tokens.RemoveAt(insertIndex);
 				}
 			}
 			else
 			{
-				source.Elements.Insert(insertIndex, newValue);
+				source.Tokens.Insert(insertIndex, newValue);
 			}
 		}
 
-		public static void Substitute(this Expression source, IVariable variable, IElement[] expression)
+		public static void Substitute(this Expression source, IVariable variable, IToken[] expression)
 		{
-			if (source.Elements.Any(e => e.Symbol == variable.Symbol))
+			if (source.Tokens.Any(e => e.Contents == variable.Contents))
 			{
 				int index = -1;
-				int elementCount = source.ElementCount;
-				while (index++ < elementCount)
+				int tokenCount = source.TokenCount;
+				while (index++ < tokenCount)
 				{
-					IElement currentElement = source.ElementAt(index);
+					IToken currentToken = source.TokenAt(index);
 
-					if (currentElement.Symbol == variable.Symbol)
+					if (currentToken.Contents == variable.Contents)
 					{
-						source.Elements.RemoveAt(index);
-						source.Elements.InsertRange(index, expression);
+						source.Tokens.RemoveAt(index);
+						source.Tokens.InsertRange(index, expression);
 					}
 				}
 			}
 		}
 
-		public static bool OnlyArithmeticElements(this Expression source)
+		public static bool OnlyArithmeticTokens(this Expression source)
 		{
 			return (!source.Variables.Any()
 				&& source.Numbers.Any());
@@ -73,27 +73,27 @@ namespace AlgebraicTermRewriter
 
 		public static int RankComplexity(this Expression source)
 		{
-			int elementCount = source.Terms.Count();
+			int tokenCount = source.Terms.Count();
 
-			if (elementCount == 1)
+			if (tokenCount == 1)
 			{
-				ElementType singletonType = source.Elements.First().Type;
-				if (singletonType == ElementType.Number) return 1;
-				else if (singletonType == ElementType.Variable) return 2;
+				TokenType singletonType = source.Tokens.First().Type;
+				if (singletonType == TokenType.Number) return 1;
+				else if (singletonType == TokenType.Variable) return 2;
 			}
-			else if (elementCount == 2)
+			else if (tokenCount == 2)
 			{
-				ElementType firstType = source.Elements[0].Type;
-				ElementType secondType = source.Elements[1].Type;
+				TokenType firstType = source.Tokens[0].Type;
+				TokenType secondType = source.Tokens[1].Type;
 
 				if (firstType == secondType)
 				{
-					if (firstType == ElementType.Number) return 1;
+					if (firstType == TokenType.Number) return 1;
 					else return 3;
 				}
 				else return 2;
 			}
-			else if (elementCount == 3)
+			else if (tokenCount == 3)
 			{
 				int variables = source.Variables.Count();
 				if (variables >= 2) return 4;
@@ -102,38 +102,38 @@ namespace AlgebraicTermRewriter
 			return 5;
 		}
 
-		public static TermOperatorPair Extract(this Expression source, int elementIndex)
+		public static TermOperatorPair Extract(this Expression source, int tokenIndex)
 		{
-			if (elementIndex < 0 || elementIndex > source.ElementCount - 1) throw new IndexOutOfRangeException(nameof(elementIndex));
+			if (tokenIndex < 0 || tokenIndex > source.TokenCount - 1) throw new IndexOutOfRangeException(nameof(tokenIndex));
 
-			int operationIndex = elementIndex - 1;
-			//if (elementIndex == 0)
+			int operationIndex = tokenIndex - 1;
+			//if (tokenIndex == 0)
 			//{
 			//	operationIndex = 1;
 			//}
 
-			ITerm term = source.ElementAt(elementIndex) as ITerm;
+			ITerm term = source.TokenAt(tokenIndex) as ITerm;
 			IOperator oper = null;
 
 			if (operationIndex == -1)
 			{
-				oper = source.RightOfElement(term) as IOperator;
-				if (oper.Symbol == "-")
+				oper = source.RightOfToken(term) as IOperator;
+				if (oper.Contents == "-")
 				{
 					oper = new Operator('+');
 				}
 			}
 			else
 			{
-				oper = source.ElementAt(operationIndex) as IOperator;
+				oper = source.TokenAt(operationIndex) as IOperator;
 			}
 
-			source.Elements.Remove(term);
-			source.Elements.Remove(oper);
+			source.Tokens.Remove(term);
+			source.Tokens.Remove(oper);
 
 
 			InsertOrientation orientation = InsertOrientation.Either;
-			if (operationIndex < elementIndex)
+			if (operationIndex < tokenIndex)
 			{
 				//if (oper.Symbol == "+" || oper.Symbol == "*")
 				//{
@@ -141,12 +141,12 @@ namespace AlgebraicTermRewriter
 				orientation = InsertOrientation.Right;
 				//}
 			}
-			else// if (elementIndex == 0)
+			else// if (tokenIndex == 0)
 			{
 				oper = Operator.GetInverse(oper);
 				orientation = InsertOrientation.Right;
 			}
-			//if (operationIndex < elementIndex)
+			//if (operationIndex < tokenIndex)
 			//{
 			//	orientation = InsertOrientation.Left;
 			//}
@@ -165,24 +165,24 @@ namespace AlgebraicTermRewriter
 
 			if (expression.StartsWith("0"))
 			{
-				source.Elements.RemoveAt(0);
-				source.Elements.RemoveAt(0);
+				source.Tokens.RemoveAt(0);
+				source.Tokens.RemoveAt(0);
 				return;
 			}
 
 			if (expression.StartsWith("-"))
 			{
-				source.Elements.RemoveAt(0);
+				source.Tokens.RemoveAt(0);
 			}
 			else
 			{
-				if (source.ElementCount > 0)
+				if (source.TokenCount > 0)
 				{
-					INumber num = source.Elements[0] as INumber;
+					INumber num = source.Tokens[0] as INumber;
 					if (num != null)
 					{
 						int newNum = -num.Value;
-						source.Elements[0] = new Number(newNum);
+						source.Tokens[0] = new Number(newNum);
 						return;
 					}
 				}
@@ -192,14 +192,14 @@ namespace AlgebraicTermRewriter
 		public static void SetToMultiplicativeInverse(this Expression source)
 		{
 			bool isNegative = false;
-			IElement first = null;
-			IElement second = null;
+			IToken first = null;
+			IToken second = null;
 
-			first = source.Elements.FirstOrDefault();
-			if (first != null && first.Symbol == "0")
+			first = source.Tokens.FirstOrDefault();
+			if (first != null && first.Contents == "0")
 			{
-				second = source.Elements.Skip(1).FirstOrDefault();
-				if (second != null && second.Symbol == "-")
+				second = source.Tokens.Skip(1).FirstOrDefault();
+				if (second != null && second.Contents == "-")
 				{
 					isNegative = true;
 				}
@@ -208,10 +208,10 @@ namespace AlgebraicTermRewriter
 
 			if (!isNegative)
 			{
-				first = source.Elements.FirstOrDefault();
-				if (first != null && first.Symbol == "-")
+				first = source.Tokens.FirstOrDefault();
+				if (first != null && first.Contents == "-")
 				{
-					second = source.Elements.Skip(1).FirstOrDefault();
+					second = source.Tokens.Skip(1).FirstOrDefault();
 					if (second != null && second is IVariable)
 					{
 						isNegative = true;
@@ -221,8 +221,8 @@ namespace AlgebraicTermRewriter
 
 			if (isNegative)
 			{
-				source.Elements.Remove(first);
-				source.Elements.Remove(second);
+				source.Tokens.Remove(first);
+				source.Tokens.Remove(second);
 			}
 
 		}
@@ -232,28 +232,28 @@ namespace AlgebraicTermRewriter
 	#region Unused / Dead code
 	public static class ExpressionExtensionMethods_Manipulations
 	{
-		public static IElement LeftOfElement(this Expression source, IElement element)
+		public static IToken LeftOfToken(this Expression source, IToken token)
 		{
-			int index = source.Elements.IndexOf(element);
-			if (index == 0) return Element.None;
-			else return source.ElementAt(index - 1);
+			int index = source.Tokens.IndexOf(token);
+			if (index == 0) return Token.None;
+			else return source.TokenAt(index - 1);
 		}
 
-		public static IElement RightOfElement(this Expression source, IElement element)
+		public static IToken RightOfToken(this Expression source, IToken token)
 		{
-			int index = source.Elements.IndexOf(element);
-			if (index == source.ElementCount - 1) return Element.None;
-			else return source.ElementAt(index + 1);
+			int index = source.Tokens.IndexOf(token);
+			if (index == source.TokenCount - 1) return Token.None;
+			else return source.TokenAt(index + 1);
 		}
 
-		public static TermOperatorPair Extract(this Expression source, IElement element)
+		public static TermOperatorPair Extract(this Expression source, IToken token)
 		{
-			return source.Extract(source.Elements.IndexOf(element));
+			return source.Extract(source.Tokens.IndexOf(token));
 		}
 
 		public static bool OperatorsAllSame(this Expression source)
 		{
-			var operators = source.Elements.Where(e => e is IOperator);
+			var operators = source.Tokens.Where(e => e is IOperator);
 
 			int count = operators.Select(o => o.Type).Distinct().Count();
 
@@ -261,8 +261,8 @@ namespace AlgebraicTermRewriter
 		}
 		public static bool TermsAllSame(this Expression source, TermType type)
 		{
-			ElementType elementType = type.GetElementType();
-			return source.Elements.Select(e => e.Type).Same();
+			TokenType tokenType = type.GetTokenType();
+			return source.Tokens.Select(e => e.Type).Same();
 		}
 	}
 	#endregion
@@ -277,12 +277,12 @@ namespace AlgebraicTermRewriter
 	//		return;
 	//	}
 
-	//	string elements = string.Join("", source.Elements.Select(e => e.Symbol[0]));
+	//	string tokens = string.Join("", source.Tokens.Select(e => e.Symbol[0]));
 
 	//	var found = new List<Tuple<char, List<int>>>();
 	//	foreach (char distinct in distinctVars)
 	//	{
-	//		List<int> indices = Enumerable.Range(0, elements.Length - 1).Where(i => distinct.Equals(elements[i])).ToList();
+	//		List<int> indices = Enumerable.Range(0, tokens.Length - 1).Where(i => distinct.Equals(tokens[i])).ToList();
 
 	//		if (indices.Count > 1)
 	//		{
@@ -307,9 +307,9 @@ namespace AlgebraicTermRewriter
 	//			continue;
 	//		}
 
-	//		IElement element = source.ElementAt(index);
+	//		IToken token = source.TokenAt(index);
 
-	//		IOperator left = source.LeftOfElement(element) as IOperator;
+	//		IOperator left = source.LeftOfToken(token) as IOperator;
 
 	//		if (left.Symbol == "+")
 	//		{
@@ -324,19 +324,19 @@ namespace AlgebraicTermRewriter
 	//		}
 	//		else if (left.Symbol == "*")
 	//		{
-	//			IElement leftLeft = source.LeftOfElement(left);
-	//			if (leftLeft != Element.None && leftLeft.Type == ElementType.Number)
+	//			IToken leftLeft = source.LeftOfToken(left);
+	//			if (leftLeft != Token.None && leftLeft.Type == TokenType.Number)
 	//			{
 	//				int multiplyer = (leftLeft as INumber).Value;
 
-	//				IElement leftLeftLeft = source.LeftOfElement(leftLeft);
+	//				IToken leftLeftLeft = source.LeftOfToken(leftLeft);
 
 	//				if (leftLeftLeft.Symbol == "-")
 	//				{
 	//					value -= multiplyer;
 	//					insertPosition = index - 3;
 	//				}
-	//				else //if (leftLeftLeft == Element.None || leftLeftLeft.Symbol == "+")
+	//				else //if (leftLeftLeft == Token.None || leftLeftLeft.Symbol == "+")
 	//				{
 	//					value += multiplyer;
 	//					insertPosition = index - 2;

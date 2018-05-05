@@ -20,7 +20,7 @@ namespace AlgebraicTermRewriter
 		Variable	
 	}
 
-	public enum ElementType
+	public enum TokenType
 	{
 		None,
 		Number,
@@ -62,13 +62,13 @@ namespace AlgebraicTermRewriter
 			else throw new ArgumentException($"{nameof(input)} is not a ComparativeType.");
 		}
 
-		public static ElementType ElementTypeEnum(char symbol)
+		public static TokenType TokenTypeEnum(char symbol)
 		{
-			if (Types.Operators.Contains(symbol)) return ElementType.Operator;
-			else if (Types.Numbers.Contains(symbol)) return ElementType.Number;
-			else if (Types.Variables.Contains(symbol)) return ElementType.Variable;
-			else if (Types.Comparative.Contains(symbol)) return ElementType.Comparative;
-			else throw new ArgumentException($"{symbol} is not a ElementType.");
+			if (Types.Operators.Contains(symbol)) return TokenType.Operator;
+			else if (Types.Numbers.Contains(symbol)) return TokenType.Number;
+			else if (Types.Variables.Contains(symbol)) return TokenType.Variable;
+			else if (Types.Comparative.Contains(symbol)) return TokenType.Comparative;
+			else throw new ArgumentException($"{symbol} is not a TokenType.");
 		}
 	}
 }

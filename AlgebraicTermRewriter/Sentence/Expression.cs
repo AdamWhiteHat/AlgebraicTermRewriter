@@ -13,51 +13,51 @@ namespace AlgebraicTermRewriter
 	public class Expression : ISentence, ICloneable<Expression>
 	{
 		public static Expression Empty = new Expression();
-		public IEnumerable<IOperator> Operators { get { return Elements.Where(e => e.Type == ElementType.Operator).Select(e => (e as IOperator)); } }
-		public IEnumerable<INumber> Numbers { get { return Elements.Where(e => e.Type == ElementType.Number).Select(e => (e as INumber)); } }
-		public IEnumerable<IVariable> Variables { get { return Elements.Where(e => e.Type == ElementType.Variable).Select(e => (e as IVariable)); } }
-		public IEnumerable<ITerm> Terms { get { return Elements.Where(e => e.Type == ElementType.Number || e.Type == ElementType.Variable).Select(e => (e as ITerm)); } }
+		public IEnumerable<IOperator> Operators { get { return Tokens.Where(e => e.Type == TokenType.Operator).Select(e => (e as IOperator)); } }
+		public IEnumerable<INumber> Numbers { get { return Tokens.Where(e => e.Type == TokenType.Number).Select(e => (e as INumber)); } }
+		public IEnumerable<IVariable> Variables { get { return Tokens.Where(e => e.Type == TokenType.Variable).Select(e => (e as IVariable)); } }
+		public IEnumerable<ITerm> Terms { get { return Tokens.Where(e => e.Type == TokenType.Number || e.Type == TokenType.Variable).Select(e => (e as ITerm)); } }
 
-		public List<IElement> Elements = new List<IElement>();
+		public List<IToken> Tokens = new List<IToken>();
 
-		public int ElementCount { get { return Elements.Count; } }
+		public int TokenCount { get { return Tokens.Count; } }
 
-		public bool IsSimplified { get { return ElementCount == 1 || ElementCount == 2; } }
-		public bool IsVariableIsolated { get { return (IsSimplified && Elements.First().Type == ElementType.Variable); } }
+		public bool IsSimplified { get { return TokenCount == 1 || TokenCount == 2; } }
+		public bool IsVariableIsolated { get { return (IsSimplified && Tokens.First().Type == TokenType.Variable); } }
 
 		public int Value
 		{
 			get
 			{
 				if (!IsSimplified) throw new Exception("Expression is not a single value.");
-				if (!(Elements.First() is INumber)) throw new Exception("Expression is not a numeric value.");
-				else return (Elements.Single() as INumber).Value;
+				if (!(Tokens.First() is INumber)) throw new Exception("Expression is not a numeric value.");
+				else return (Tokens.Single() as INumber).Value;
 			}
 		}
 
 		private Expression()
 		{
-			Elements = new List<IElement>();
+			Tokens = new List<IToken>();
 		}
 
-		public Expression(IElement[] elements)
+		public Expression(IToken[] tokens)
 		{
-			Elements = elements.ToList();
+			Tokens = tokens.ToList();
 		}
 
-		public IElement ElementAt(int index)
+		public IToken TokenAt(int index)
 		{
-			if (index < 0 || index > ElementCount - 1)
+			if (index < 0 || index > TokenCount - 1)
 			{
-				return Element.None;
+				return Token.None;
 			}
 
-			return Elements.ElementAt(index);
+			return Tokens.ElementAt(index);
 		}
 
-		internal void AddElement(IElement newElement)
+		internal void AddToken(IToken newToken)
 		{
-			Elements.Add(newElement);
+			Tokens.Add(newToken);
 		}
 
 		public void Insert(TermOperatorPair pair)
@@ -66,24 +66,24 @@ namespace AlgebraicTermRewriter
 
 			if (pair.Orientation == InsertOrientation.Left)
 			{
-				Elements.Insert(0, pair.Operator);
-				Elements.Insert(0, pair.Term);
+				Tokens.Insert(0, pair.Operator);
+				Tokens.Insert(0, pair.Term);
 			}
 			else
 			{
-				Elements.Add(pair.Operator);
-				Elements.Add(pair.Term);
+				Tokens.Add(pair.Operator);
+				Tokens.Add(pair.Term);
 			}
 		}
 
 		public Expression Clone()
 		{
-			return new Expression(this.Elements.ToArray());
+			return new Expression(this.Tokens.ToArray());
 		}
 
 		public override string ToString()
 		{
-			return string.Join(" ", Elements.Select(e => e.Symbol));
+			return string.Join(" ", Tokens.Select(e => e.Contents));
 		}
 	}
 }

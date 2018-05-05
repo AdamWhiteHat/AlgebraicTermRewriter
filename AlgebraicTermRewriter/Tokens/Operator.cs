@@ -8,18 +8,18 @@ namespace AlgebraicTermRewriter
 {
 	public class Operator : IOperator
 	{
-		public char Value { get; private set; }
-		public string Symbol { get; private set; }
-		public ElementType Type { get { return ElementType.Operator; } }
+		public char Symbol { get; private set; }
+		public string Contents { get; private set; }
+		public TokenType Type { get { return TokenType.Operator; } }
 		public Operator(char symbol)
 		{
-			
+
 			if (!Types.Operators.Contains(symbol))
 			{
 				throw new ArgumentException($"{nameof(symbol)} does not match any of the valid operator symbols.");
 			}
-			Value = symbol;
-			Symbol = symbol.ToString(); ;
+			Symbol = symbol;
+			Contents = symbol.ToString();
 		}
 
 		public Number ApplyOperation(Number lhs, Number rhs)
@@ -30,16 +30,16 @@ namespace AlgebraicTermRewriter
 			int total = 0;
 			switch (Symbol)
 			{
-				case "+":
+				case '+':
 					total = l + r;
 					break;
-				case "-":
+				case '-':
 					total = l - r;
 					break;
-				case "*":
+				case '*':
 					total = l * r;
 					break;
-				case "/":
+				case '/':
 					total = l / r;
 					break;
 			}
@@ -47,17 +47,17 @@ namespace AlgebraicTermRewriter
 			return new Number(total);
 		}
 
-		public static IOperator GetInverse(IOperator element)
+		public static IOperator GetInverse(IOperator token)
 		{
-			switch (element.Symbol)
+			switch (token.Symbol)
 			{
-				case "+":
+				case '+':
 					return new Operator('-');
-				case "-":
+				case '-':
 					return new Operator('+');
-				case "*":
+				case '*':
 					return new Operator('/');
-				case "/":
+				case '/':
 					return new Operator('*');
 				default:
 					throw new ArgumentException();
@@ -66,7 +66,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			return Symbol;
+			return Symbol.ToString();
 		}
 	}
 }

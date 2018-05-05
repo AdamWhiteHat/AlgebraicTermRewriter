@@ -27,10 +27,10 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
-		public static ElementType GetElementType(this TermType source)
+		public static TokenType GetTokenType(this TermType source)
 		{
-			if (source == TermType.Number) return ElementType.Number;
-			else return ElementType.Variable;
+			if (source == TermType.Number) return TokenType.Number;
+			else return TokenType.Variable;
 		}
 	}
 }

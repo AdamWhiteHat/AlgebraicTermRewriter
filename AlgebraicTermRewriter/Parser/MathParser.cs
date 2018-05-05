@@ -68,10 +68,10 @@ namespace AlgebraicTermRewriter
 
 			Stack<char> stack = new Stack<char>(input.Replace(" ", "").Reverse());
 
-			List<IElement> elements = new List<IElement>();
+			List<IToken> tokens = new List<IToken>();
 			while (stack.Any())
 			{
-				IElement newElement = null;
+				IToken newToken = null;
 
 				char c = stack.Pop();
 
@@ -84,21 +84,21 @@ namespace AlgebraicTermRewriter
 						value += c;
 					}
 
-					newElement = new Number(int.Parse(value));
+					newToken = new Number(int.Parse(value));
 				}
 				else if (Types.Operators.Contains(c))
 				{
-					newElement = new Operator(c);
+					newToken = new Operator(c);
 				}
 				else if (Types.Variables.Contains(c))
 				{
-					newElement = new Variable(c);
+					newToken = new Variable(c);
 				}
 
-				elements.Add(newElement);
+				tokens.Add(newToken);
 			}
 
-			Expression result = new Expression(elements.ToArray());
+			Expression result = new Expression(tokens.ToArray());
 			return result;
 		}
 	}

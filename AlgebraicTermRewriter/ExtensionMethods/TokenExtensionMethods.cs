@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace AlgebraicTermRewriter
 {
-	public static class ElementCollectionExtensionMethods
+	public static class TokenCollectionExtensionMethods
 	{
-		public static Tuple<int, int> GetLongestArithmeticRange(this IEnumerable<IElement> source)
+		public static Tuple<int, int> GetLongestArithmeticRange(this IEnumerable<IToken> source)
 		{
 			int startIndex = -1;
 
@@ -18,11 +18,11 @@ namespace AlgebraicTermRewriter
 			int sequenceCount = 0;
 
 			List<Tuple<int, int>> results = new List<Tuple<int, int>>();
-			foreach (IElement e in source)
+			foreach (IToken e in source)
 			{
 				currentIndex++;
 
-				if (e.Type == ElementType.Number)
+				if (e.Type == TokenType.Number)
 				{
 					if (isSequence != true)
 					{
@@ -40,7 +40,7 @@ namespace AlgebraicTermRewriter
 					}
 					sequenceCount += 2;
 				}
-				else if (e.Type == ElementType.Operator)
+				else if (e.Type == TokenType.Operator)
 				{
 					//continue;
 				}
@@ -74,34 +74,34 @@ namespace AlgebraicTermRewriter
 			return null;
 		}
 
-		public static Tuple<List<IElement>, int> FindLongestSubsequenceOfArithmeticElements(this IEnumerable<IElement> source)
+		public static Tuple<List<IToken>, int> FindLongestSubsequenceOfArithmeticTokens(this IEnumerable<IToken> source)
 		{
-			return source.FindLongestSubsetWhere((e) => e.Type == ElementType.Number || e.Type == ElementType.Operator);
+			return source.FindLongestSubsetWhere((e) => e.Type == TokenType.Number || e.Type == TokenType.Operator);
 		}
 
-		public static Tuple<List<IElement>, int> FindLongestSubsetWhere(this IEnumerable<IElement> source, Func<IElement, bool> predicate)
+		public static Tuple<List<IToken>, int> FindLongestSubsetWhere(this IEnumerable<IToken> source, Func<IToken, bool> predicate)
 		{
 			int counter = 0;
 			int length = source.Count();
 
-			List<Tuple<List<IElement>, int>> subSets = new List<Tuple<List<IElement>, int>>();
-			List<IElement> sequence = new List<IElement>();
+			List<Tuple<List<IToken>, int>> subSets = new List<Tuple<List<IToken>, int>>();
+			List<IToken> sequence = new List<IToken>();
 
-			var acceptResultBehavior = new Action<List<IElement>, int>((lst, cntr) =>
+			var acceptResultBehavior = new Action<List<IToken>, int>((lst, cntr) =>
 			{
 				if (lst.Any())
 				{
-					subSets.Add(new Tuple<List<IElement>, int>(lst, cntr - lst.Count()));
+					subSets.Add(new Tuple<List<IToken>, int>(lst, cntr - lst.Count()));
 				}
 			});
 
-			foreach (IElement e in source)
+			foreach (IToken e in source)
 			{
 				counter++;
 
 				if (predicate.Invoke(e))
 				{
-					if (sequence.Count() != 0 || e.Type == ElementType.Number)
+					if (sequence.Count() != 0 || e.Type == TokenType.Number)
 					{
 						sequence.Add(e);
 					}
@@ -109,7 +109,7 @@ namespace AlgebraicTermRewriter
 				else
 				{
 					acceptResultBehavior.Invoke(sequence, counter);
-					sequence = new List<IElement>();
+					sequence = new List<IToken>();
 				}
 			}
 
@@ -121,33 +121,33 @@ namespace AlgebraicTermRewriter
 			if (longest > 0)
 			{
 
-				Tuple<List<IElement>, int> result = subSets.Where(l => l.Item1.Count() == longest).FirstOrDefault();
+				Tuple<List<IToken>, int> result = subSets.Where(l => l.Item1.Count() == longest).FirstOrDefault();
 
 				if (result != null)
 				{
 					var lst = result.Item1;
-					if (lst.Last().Type == ElementType.Operator)
+					if (lst.Last().Type == TokenType.Operator)
 					{
 						lst.Remove(lst.Last());
-						return new Tuple<List<IElement>, int>(lst, result.Item2);
+						return new Tuple<List<IToken>, int>(lst, result.Item2);
 					}
 				}
 
 				return result;
 			}
 
-			return new Tuple<List<IElement>, int>(new List<IElement>(), -1);
+			return new Tuple<List<IToken>, int>(new List<IToken>(), -1);
 		}
 	}
 
-	public static class ElementExtensionMethods
+	public static class TokenExtensionMethods
 	{
-		public static string AsString(this IElement source)
+		public static string AsString(this IToken source)
 		{
-			return source.Symbol;
+			return source.Contents;
 		}
 
-		public static string AsString(this IEnumerable<IElement> source)
+		public static string AsString(this IEnumerable<IToken> source)
 		{
 			return string.Join(" ", source.Select(e => e.AsString()));
 		}

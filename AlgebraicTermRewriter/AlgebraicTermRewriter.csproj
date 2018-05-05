@@ -40,12 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Elements\Element.cs" />
-    <Compile Include="Elements\TermOperatorPair.cs" />
-    <Compile Include="Elements\Number.cs" />
-    <Compile Include="Elements\Operator.cs" />
-    <Compile Include="Elements\Variable.cs" />
-    <Compile Include="ExtensionMethods\ElementExtensionMethods.cs" />
+    <Compile Include="Tokens\Token.cs" />
+    <Compile Include="Tokens\TermOperatorPair.cs" />
+    <Compile Include="Tokens\Number.cs" />
+    <Compile Include="Tokens\Operator.cs" />
+    <Compile Include="Tokens\Variable.cs" />
+    <Compile Include="ExtensionMethods\TokenExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\EquationExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\IEnumerableExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\TypeEnumExtensionMethods.cs" />

@@ -13,7 +13,7 @@ namespace AlgebraicTermRewriter
 			return source.LeftHandSide.Variables.Concat(source.RightHandSide.Variables).Distinct().Count();
 		}
 
-		public static void Substitute(this Equation source, IVariable variable, Element[] expression)
+		public static void Substitute(this Equation source, IVariable variable, Token[] expression)
 		{
 			source.LeftHandSide.Substitute(variable, expression);
 			source.RightHandSide.Substitute(variable, expression);
@@ -25,9 +25,9 @@ namespace AlgebraicTermRewriter
 			source.RightHandSide.Insert(pair);
 		}
 
-		public static bool OnlyArithmeticElements(this Equation source)
+		public static bool OnlyArithmeticTokens(this Equation source)
 		{
-			return source.LeftHandSide.OnlyArithmeticElements() && source.RightHandSide.OnlyArithmeticElements();
+			return source.LeftHandSide.OnlyArithmeticTokens() && source.RightHandSide.OnlyArithmeticTokens();
 		}
 
 		public static void EnsureVariableOnLeft(this Equation source)

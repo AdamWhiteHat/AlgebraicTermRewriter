@@ -45,30 +45,30 @@ namespace RewriterTests
 		[TestMethod]
 		public void TestExpressionExtensionMethods()
 		{
-			IElement elm = exp.ElementAt(2);
-			Assert.AreEqual(ElementType.Variable, elm.Type);
+			IToken elm = exp.TokenAt(2);
+			Assert.AreEqual(TokenType.Variable, elm.Type);
 			Variable var = (Variable)elm;
 
 			Print(exp.ToString());
 			Print("---");
 			Print();
-			Print("Selected element: " + var.ToString());
+			Print("Selected token: " + var.ToString());
 			Print();
-			Print("RightOfElement: " + exp.RightOfElement(var).ToString());
-			Print("LeftOfElement: " + exp.LeftOfElement(var).ToString());
+			Print("RightOfToken: " + exp.RightOfToken(var).ToString());
+			Print("LeftOfToken: " + exp.LeftOfToken(var).ToString());
 			Print();
 			Print("---");
 			Print();
 
-			IElement firstElm = exp.ElementAt(0);
-			IElement lastElm = exp.ElementAt(exp.ElementCount - 1);
+			IToken firstElm = exp.TokenAt(0);
+			IToken lastElm = exp.TokenAt(exp.TokenCount - 1);
 
-			Print(exp.LeftOfElement(firstElm).ToString());
-			Print(exp.RightOfElement(lastElm).ToString());
+			Print(exp.LeftOfToken(firstElm).ToString());
+			Print(exp.RightOfToken(lastElm).ToString());
 		}
 
 		[TestMethod]
-		public void TestExtractElement()
+		public void TestExtractToken()
 		{
 			Expression e1 = exp.Clone();
 			Expression e2 = exp.Clone();
@@ -96,26 +96,26 @@ namespace RewriterTests
 		[TestMethod]
 		public void TestTypeResolution()
 		{
-			IElement isNum = new Number(3);
-			IElement isOp = new Operator('*');
-			IElement isVar = new Variable('x');
+			IToken isNum = new Number(3);
+			IToken isOp = new Operator('*');
+			IToken isVar = new Variable('x');
 
 			INumber number = new Number(2);
-			IElement isElement = Element.None;
+			IToken isToken = Token.None;
 
-			Assert.AreEqual(isNum.Type, ElementType.Number, "isNum.Type, ElementType.Number  ");
-			Assert.AreEqual(isOp.Type, ElementType.Operator, "isOp.Type,  ElementType.Operator");
-			Assert.AreEqual(isVar.Type, ElementType.Variable, "isVar.Type, ElementType.Variable");
-
-
-			IElement elementFromNumber = number as IElement;
-			Assert.IsNotNull(elementFromNumber, "IElement elementFromNumber = number as IElement");
+			Assert.AreEqual(isNum.Type, TokenType.Number, "isNum.Type, TokenType.Number  ");
+			Assert.AreEqual(isOp.Type, TokenType.Operator, "isOp.Type,  TokenType.Operator");
+			Assert.AreEqual(isVar.Type, TokenType.Variable, "isVar.Type, TokenType.Variable");
 
 
-			Assert.IsTrue(typeof(IElement).IsAssignableFrom(typeof(INumber)), "	typeof(IElement).IsAssignableFrom(typeof(INumber))");
-			Assert.IsTrue(typeof(IElement).IsAssignableFrom(typeof(IOperator)), "typeof(IElement).IsAssignableFrom(typeof(IOperator)) ");
-			Assert.IsTrue(typeof(IElement).IsAssignableFrom(typeof(IVariable)), "typeof(IElement).IsAssignableFrom(typeof(IVariable))");
-			Assert.IsTrue(typeof(IElement).IsAssignableFrom(typeof(ITerm)), "typeof(IElement).IsAssignableFrom(typeof(ITerm))");
+			IToken tokenFromNumber = number as IToken;
+			Assert.IsNotNull(tokenFromNumber, "IToken tokenFromNumber = number as IToken");
+
+
+			Assert.IsTrue(typeof(IToken).IsAssignableFrom(typeof(INumber)), "	typeof(IToken).IsAssignableFrom(typeof(INumber))");
+			Assert.IsTrue(typeof(IToken).IsAssignableFrom(typeof(IOperator)), "typeof(IToken).IsAssignableFrom(typeof(IOperator)) ");
+			Assert.IsTrue(typeof(IToken).IsAssignableFrom(typeof(IVariable)), "typeof(IToken).IsAssignableFrom(typeof(IVariable))");
+			Assert.IsTrue(typeof(IToken).IsAssignableFrom(typeof(ITerm)), "typeof(IToken).IsAssignableFrom(typeof(ITerm))");
 			Assert.IsTrue(typeof(ITerm).IsAssignableFrom(typeof(INumber)), "typeof(ITerm).IsAssignableFrom(typeof(INumber))");
 			Assert.IsTrue(typeof(ITerm).IsAssignableFrom(typeof(IVariable)), "typeof(ITerm).IsAssignableFrom(typeof(IVariable))");
 
@@ -124,29 +124,29 @@ namespace RewriterTests
 			IVariable varY = new Variable('y');
 			INumber numSeven = new Number(7);
 
-			List<IElement> mixedElements = new List<IElement>();
-			mixedElements.Add(opMulti);
-			mixedElements.Add(varY);
-			mixedElements.Add(numSeven);
+			List<IToken> mixedTokens = new List<IToken>();
+			mixedTokens.Add(opMulti);
+			mixedTokens.Add(varY);
+			mixedTokens.Add(numSeven);
 
-			Assert.IsTrue(mixedElements[0] is IOperator, "elements[0] is IOperator");
-			Assert.IsTrue(mixedElements[1] is IVariable, "elements[1] is IVariable");
-			Assert.IsTrue(mixedElements[2] is INumber, "elements[2] is INumber  ");
-			Assert.IsTrue(mixedElements[2] is IElement, "elements[2] is IElement  ");
+			Assert.IsTrue(mixedTokens[0] is IOperator, "tokens[0] is IOperator");
+			Assert.IsTrue(mixedTokens[1] is IVariable, "tokens[1] is IVariable");
+			Assert.IsTrue(mixedTokens[2] is INumber, "tokens[2] is INumber  ");
+			Assert.IsTrue(mixedTokens[2] is IToken, "tokens[2] is IToken  ");
 
 
-			mixedElements.Add(number);
-			mixedElements.Add(isElement);
-			mixedElements.Add(isNum);
-			mixedElements.Add(isOp);
-			mixedElements.Add(isVar);
+			mixedTokens.Add(number);
+			mixedTokens.Add(isToken);
+			mixedTokens.Add(isNum);
+			mixedTokens.Add(isOp);
+			mixedTokens.Add(isVar);
 
-			int termCount = mixedElements.Where(e => e is ITerm).Count();
+			int termCount = mixedTokens.Where(e => e is ITerm).Count();
 
 			Assert.AreEqual(5, termCount);
 
 
-			IEnumerable<IElement> col = mixedElements.ToList();
+			IEnumerable<IToken> col = mixedTokens.ToList();
 
 			int complexity = exp.RankComplexity();
 			Print($"Complexity: {complexity}");

@@ -12,7 +12,7 @@ namespace RewriterTests
 	{
 
 		[TestMethod]
-		public void TestCombineArithmeticElements()
+		public void TestCombineArithmeticTokens()
 		{
 			string[] EquationA = new string[] { "x-5=10", "x = 15" };
 			string[] EquationB = new string[] { "10=x-5", "x = 15" };
@@ -94,7 +94,7 @@ namespace RewriterTests
 
 		/*
 		[TestMethod]
-		public void TestCombineArithmeticElements()
+		public void TestCombineArithmeticTokens()
 		{
 
 			string equation0 = "1+9";
@@ -110,32 +110,32 @@ namespace RewriterTests
 
 			string equation8 = "y+4*x-9/z+2*y^2";
 
-			CombineArithmeticElements(equation0);
+			CombineArithmeticTokens(equation0);
 			Print("----");
-			CombineArithmeticElements(equation1);
+			CombineArithmeticTokens(equation1);
 			Print("----");
-			CombineArithmeticElements(equation2);
+			CombineArithmeticTokens(equation2);
 			Print("----");
-			CombineArithmeticElements(equation3);
+			CombineArithmeticTokens(equation3);
 			Print("----");
-			CombineArithmeticElements(equation4);
+			CombineArithmeticTokens(equation4);
 			Print("----");
-			CombineArithmeticElements(equation5);
+			CombineArithmeticTokens(equation5);
 			Print("----");
-			CombineArithmeticElements(equation6);
+			CombineArithmeticTokens(equation6);
 			Print("----");
-			CombineArithmeticElements(equation7);
+			CombineArithmeticTokens(equation7);
 			Print("----");
-			CombineArithmeticElements(equation8);
+			CombineArithmeticTokens(equation8);
 		}
 
 
-		public void CombineArithmeticElements(string expression)
+		public void CombineArithmeticTokens(string expression)
 		{
 			Expression exp = new Expression(expression);
 			Print(exp.ToString());
 			Print();
-			exp.CombineArithmeticElements();
+			exp.CombineArithmeticTokens();
 			Print();
 			Print(exp.ToString());
 			Print();
@@ -148,7 +148,7 @@ namespace RewriterTests
 		{
 			string equation1 = "-8*2+7";
 
-			CombineArithmeticElements(equation1);
+			CombineArithmeticTokens(equation1);
 		}
 		*/
 
@@ -169,7 +169,7 @@ namespace RewriterTests
 			exp.RightHandSide.Insert(pair);
 			Print(exp.ToString());
 
-			exp.RightHandSide.CombineArithmeticElements();
+			exp.RightHandSide.CombineArithmeticTokens();
 			Print(exp.ToString());
 		}
 
@@ -189,7 +189,7 @@ namespace RewriterTests
 			exp.RightHandSide.Insert(pair);
 			Print(exp.ToString());
 
-			exp.RightHandSide.CombineArithmeticElements();
+			exp.RightHandSide.CombineArithmeticTokens();
 			Print(exp.ToString());
 		}
 
@@ -199,7 +199,7 @@ namespace RewriterTests
 
 		/*
 		[TestMethod]
-		public void TestLongestSubsequenceOfArithmeticElements()
+		public void TestLongestSubsequenceOfArithmeticTokens()
 		{
 			string equation1 = "x+5";
 			string equation2 = "y+3*4-x";
@@ -212,9 +212,9 @@ namespace RewriterTests
 			ReportLongestSubsequence(equation3);
 		}
 
-		private void ReportLongestSubsequence(string equasion)
+		private void ReportLongestSubsequence(string equation)
 		{
-			Expression parsed = new Expression(equasion);
+			Expression parsed = new Expression(equation);
 			Print();
 			Print("----------------------------");
 			Print(equasion.ToString());
@@ -225,7 +225,7 @@ namespace RewriterTests
 		{
 
 			Print();
-			Tuple<List<IElement>, int> resultString = parsed.Elements.FindLongestSubsequenceOfArithmeticElements();
+			Tuple<List<IToken>, int> resultString = parsed.Tokens.FindLongestSubsequenceOfArithmeticTokens();
 			if (resultString != null && resultString.Item1.Any())
 			{
 				Print($"{resultString.Item1.AsString()}				(position {resultString.Item2})");

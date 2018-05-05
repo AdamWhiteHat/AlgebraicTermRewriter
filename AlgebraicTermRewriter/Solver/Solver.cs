@@ -51,7 +51,7 @@ namespace AlgebraicTermRewriter
 
 		private void SolveEquation(Equation eq)
 		{
-			if (eq.OnlyArithmeticElements())
+			if (eq.OnlyArithmeticTokens())
 			{
 				Solutions.Add(IsArithmeticEquasionTrue(eq).ToString());
 				return;
@@ -145,28 +145,28 @@ namespace AlgebraicTermRewriter
 				from = eq.LeftHandSide;
 				to = eq.RightHandSide;
 
-				IElement toExtract = from.Numbers.FirstOrDefault();
+				IToken toExtract = from.Numbers.FirstOrDefault();
 
 				if (toExtract == null)
 				{
 					break;
 				}
 
-				int extractIndex = from.Elements.IndexOf(toExtract);
+				int extractIndex = from.Tokens.IndexOf(toExtract);
 
-				IElement op = null;
+				IToken op = null;
 
-				if (from.ElementCount - 1 == extractIndex)
+				if (from.TokenCount - 1 == extractIndex)
 				{
-					op = from.LeftOfElement(toExtract);
+					op = from.LeftOfToken(toExtract);
 				}
 				else
 				{
-					op = from.RightOfElement(toExtract);
-					if (op.Symbol == "/")
+					op = from.RightOfToken(toExtract);
+					if (op.Contents == "/")
 					{
-						toExtract = from.RightOfElement(op);
-						extractIndex = from.Elements.IndexOf(toExtract);
+						toExtract = from.RightOfToken(op);
+						extractIndex = from.Tokens.IndexOf(toExtract);
 					}
 				}
 
@@ -178,7 +178,7 @@ namespace AlgebraicTermRewriter
 				//	TermOperatorPair extracted = from.Extract(extractIndex);
 
 				//	TermOperatorPair termPair = new TermOperatorPair(toExtract, new Operator('-'), InsertOrientation.Right);
-				//	from.Elements.InsertRange(1, new IElement[] { termPair.Operator, termPair.Term });
+				//	from.Tokens.InsertRange(1, new IToken[] { termPair.Operator, termPair.Term });
 				//	to.Insert(termPair);
 				//}
 				//else if (op.Symbol == "/")
@@ -197,7 +197,7 @@ namespace AlgebraicTermRewriter
 				//{
 				//	TermOperatorPair extracted = from.Extract(extractIndex);
 				//	to.Insert(extracted);
-				//	//toExtract = from.ElementAt(0) as ITerm;
+				//	//toExtract = from.TokenAt(0) as ITerm;
 
 				//	//TermOperatorPair pair = from.Extract(0);
 				//	//to.Insert(pair);
@@ -207,11 +207,11 @@ namespace AlgebraicTermRewriter
 				//	//from = temp;
 				//}
 
-				to.CombineArithmeticElements();
-				from.CombineArithmeticElements();
+				to.CombineArithmeticTokens();
+				from.CombineArithmeticTokens();
 
-				IElement leadingElement = from.Elements.First();
-				if (leadingElement.Symbol == "-")
+				IToken leadingToken = from.Tokens.First();
+				if (leadingToken.Contents == "-")
 				{
 					to.SetToMultiplicativeInverse2();
 					from.SetToMultiplicativeInverse2();
@@ -240,13 +240,13 @@ namespace AlgebraicTermRewriter
 
 		private bool IsArithmeticEquasionTrue(Equation eq)
 		{
-			eq.LeftHandSide.CombineArithmeticElements();
-			eq.RightHandSide.CombineArithmeticElements();
+			eq.LeftHandSide.CombineArithmeticTokens();
+			eq.RightHandSide.CombineArithmeticTokens();
 
 			var left = eq.LeftHandSide;
 			var right = eq.RightHandSide;
 
-			if (!left.IsSimplified || !right.IsSimplified) throw new Exception("Thought both sides of the equation were arithmetic elements only, but failed to simplify one or both sides.");
+			if (!left.IsSimplified || !right.IsSimplified) throw new Exception("Expected both sides of the equation were arithmetic tokens only, but failed to simplify one or both sides.");
 
 			switch (eq.ComparativeOperator)
 			{
@@ -271,10 +271,10 @@ namespace AlgebraicTermRewriter
 
 		private void SolveExpression(Expression ex)
 		{
-			if (ex.OnlyArithmeticElements())
+			if (ex.OnlyArithmeticTokens())
 			{
-				ex.CombineArithmeticElements();
-				if (!ex.IsSimplified) throw new Exception("Thought the expression was arithmetic elements only, but failed to simplify.");
+				ex.CombineArithmeticTokens();
+				if (!ex.IsSimplified) throw new Exception("Expected the expression was arithmetic tokens only, but failed to simplify.");
 				Solutions.Add(ex.ToString());
 				PrintStatus();
 			}

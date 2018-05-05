@@ -1,11 +1,10 @@
 # AlgebraicTermRewriter
 
-Parses and tokenizes mathematical sentences, then simplifies them by rewriting them, before solving them.
-It operates on algebraic expressions and equations.
+ - Parses and tokenizes mathematical sentences, then simplifies them by rewriting them, before solving them. It operates on algebraic expressions and equations.
 
-The archetecture allows for solving inequalities and systems of equations as well, but I have not expressly handled these these types of equations yet.
+ - The archetecture allows for solving inequalities and systems of equations as well, but I have not expressly handled these these types of equations yet.
 
-Currently, the archetecture expects all numeric values to be whole-number integers. Negatives are allowed. 
+ - Currently, the archetecture expects all numeric values to be whole-number integers. Negatives are allowed. 
 
 ### Here are some notes on the terminology and concepts used in this project:
 
@@ -15,7 +14,7 @@ An **Expression** can contain a combination of numbers, variables and operations
 
 An **Equation** consists of two expressions separated by a comparative token, such as an equals symbol or a less-than symbol. For example: 7 - y = 0
 
-The project allows you to supply it with a **Problem**, which is one or more mathematical sentences, seperated by a line break.
+The project allows you to supply it with a **Problem**, which is one or more mathematical sentences, seperated by a line break. An example would be a system of equations.
   
   
 Both the Expression class and the Equation class derive from the **ISentence** interface, because they are mathematical sentences.

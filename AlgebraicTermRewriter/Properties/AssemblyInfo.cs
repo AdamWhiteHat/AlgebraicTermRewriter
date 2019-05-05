@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("AlgebraicTermRewriter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Adam Rakaska")]
+[assembly: AssemblyCompany("Adam White")]
 [assembly: AssemblyProduct("AlgebraicTermRewriter")]
-[assembly: AssemblyCopyright("Adam Rakaska")]
+[assembly: AssemblyCopyright("Adam White")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

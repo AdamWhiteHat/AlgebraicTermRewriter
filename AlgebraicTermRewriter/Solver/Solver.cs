@@ -11,6 +11,12 @@ namespace AlgebraicTermRewriter
 		private Problem equations;
 		private Action<string> LoggingMethod;
 
+		private enum OperatorLocation
+		{
+			Left,
+			Right
+		}
+
 		public List<string> Solutions { get; private set; }
 		public Dictionary<char, int> SolvedVariables { get; private set; }
 
@@ -131,36 +137,42 @@ namespace AlgebraicTermRewriter
 
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
-
-
+		
 		/// <summary>
 		/// Finds all numbers and their associated operations.
 		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
 		/// Returns a list of such tuples, ordered by precedence in ascending order.
 		/// </summary>
 		/// <returns>A list of tuples of the form: (precedence, index), ordered by precedence in ascending order.</returns>
-		private static List<Tuple<int, int>> GetPrecedenceIndexPairs(Expression from)
+		private static List<Tuple<IOperator, ITerm>> GetOperatorTermIndexPairs(Expression from)
 		{
-			List<Tuple<int, int>> results = new List<Tuple<int, int>>();
+			var results = new List<Tuple<IOperator, ITerm>>();
 
 			foreach (INumber candidate in from.Numbers)
 			{
-				int index = from.Tokens.IndexOf(candidate);
+				ITerm term = candidate;
+
+				int termIndex = from.Tokens.IndexOf(term);
 
 				IToken op = null;
 
-				if (index == 0)
+				if (termIndex == 0)
 				{
-					op = from.RightOfToken(candidate);
+					op = from.RightOfToken(term);
+
 					if (op.Contents == "/")
 					{
 						IToken alternative = from.RightOfToken(op);
-						index = from.Tokens.IndexOf(alternative);
+						term = (ITerm)alternative;
+					}
+					else if (op.Contents == "+" || op.Contents == "-")
+					{
+						op = new Operator('+');
 					}
 				}
 				else
 				{
-					op = from.LeftOfToken(candidate);
+					op = from.LeftOfToken(term);
 				}
 
 				IOperator operation = op as IOperator;
@@ -168,16 +180,21 @@ namespace AlgebraicTermRewriter
 				{
 					throw new Exception("Was expecting to find Operator.");
 				}
-
-				int precedence = ParserTokens.PrecedenceDictionary[operation.Symbol];
-
-				if (operation.Symbol == '/') precedence += 1; // Prefer other operations first
-				if (operation.Symbol == '^') continue; // One does not simply negate an exponent and move it to the other side...
-
-				results.Add(new Tuple<int, int>(precedence, index));
+								
+				results.Add(new Tuple<IOperator, ITerm>(operation, term));
 			}
 
-			return results.OrderBy(tup => tup.Item1).ToList();
+			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1)).ToList();
+		}
+
+		private static int GetOperatorSolveOrder(IOperator operation)
+		{			
+			int weight = ParserTokens.PrecedenceDictionary[operation.Symbol];
+
+			if (operation.Symbol == '/') weight += 1; // Prefer other operations first
+			if (operation.Symbol == '^') weight += 2; // One does not simply negate an exponent and move it to the other side...
+
+			return weight;
 		}
 
 		private static void IsolateSingleVariable(Equation eq)
@@ -197,71 +214,17 @@ namespace AlgebraicTermRewriter
 					break;
 				}
 
-				List<Tuple<int, int>> precedenceIndexList = GetPrecedenceIndexPairs(from);
-				if (!precedenceIndexList.Any())
+				List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
+				if (!OperatorTermIndexList.Any())
 				{
 					break;
 				}
 
-				int extractIndex = precedenceIndexList.First().Item2;
-				IToken extractTerm = from.Tokens.ElementAtOrDefault(extractIndex);
-				if (extractTerm == null)
-				{
-					throw new Exception("Index does not exist! GetPrecedenceIndexPairs() returned an invalid index positions.");
-				}
+				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
 
-				IToken op = null;
-
-				if (extractIndex == 0)
-				{
-					op = from.RightOfToken(extractTerm);
-					if (op.Contents == "/")
-					{
-						extractTerm = from.RightOfToken(op);
-						extractIndex = from.Tokens.IndexOf(extractTerm);
-					}
-				}
-				else
-				{
-					op = from.LeftOfToken(extractTerm);
-				}
-
-				TermOperatorPair extracted = from.Extract(extractIndex);
+				TermOperatorPair extracted = from.Extract(next.Item2, next.Item1);
 				to.Insert(extracted);
-
-				//if (op.Symbol == "-")
-				//{
-				//	TermOperatorPair extracted = from.Extract(extractIndex);
-
-				//	TermOperatorPair termPair = new TermOperatorPair(toExtract, new Operator('-'), InsertOrientation.Right);
-				//	from.Tokens.InsertRange(1, new IToken[] { termPair.Operator, termPair.Term });
-				//	to.Insert(termPair);
-				//}
-				//else if (op.Symbol == "/")
-				//{
-				//	TermOperatorPair extracted = from.Extract(extractIndex);
-				//	to.Insert(extracted);
-
-				//	//TermOperatorPair pair = from.Extract(2);
-				//	//to.Insert(pair);
-
-				//	//Expression temp = to;
-				//	//to = from;
-				//	//from = temp;
-				//}
-				//else
-				//{
-				//	TermOperatorPair extracted = from.Extract(extractIndex);
-				//	to.Insert(extracted);
-				//	//toExtract = from.TokenAt(0) as ITerm;
-
-				//	//TermOperatorPair pair = from.Extract(0);
-				//	//to.Insert(pair);
-
-				//	//Expression temp = to;
-				//	//to = from;
-				//	//from = temp;
-				//}
+				
 
 				to.CombineArithmeticTokens();
 				from.CombineArithmeticTokens();

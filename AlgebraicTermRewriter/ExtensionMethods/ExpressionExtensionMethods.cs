@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace AlgebraicTermRewriter
 {
@@ -102,59 +102,33 @@ namespace AlgebraicTermRewriter
 			return 5;
 		}
 
-		public static TermOperatorPair Extract(this Expression source, int tokenIndex)
+		public static TermOperatorPair Extract(this Expression source, ITerm term, IOperator op)
 		{
-			if (tokenIndex < 0 || tokenIndex > source.TokenCount - 1) throw new IndexOutOfRangeException(nameof(tokenIndex));
+			IOperator oper = op;
 
-			int operationIndex = tokenIndex - 1;
-			//if (tokenIndex == 0)
-			//{
-			//	operationIndex = 1;
-			//}
-
-			ITerm term = source.TokenAt(tokenIndex) as ITerm;
-			IOperator oper = null;
-
-			if (operationIndex == -1)
-			{
-				oper = source.RightOfToken(term) as IOperator;
-				if (oper.Contents == "-")
-				{
-					oper = new Operator('+');
-				}
-			}
-			else
-			{
-				oper = source.TokenAt(operationIndex) as IOperator;
-			}
-
-			source.Tokens.Remove(term);
-			source.Tokens.Remove(oper);
+			int tIndex = source.Tokens.IndexOf(term);
 
 
 			InsertOrientation orientation = InsertOrientation.Either;
-			if (operationIndex < tokenIndex)
+			if (tIndex == 0)
 			{
-				//if (oper.Symbol == "+" || oper.Symbol == "*")
-				//{
+				if (op.Symbol != '+')
+				{
+					source.Tokens.Remove(op);
+				}
+				
 				oper = Operator.GetInverse(oper);
 				orientation = InsertOrientation.Right;
-				//}
+				
 			}
-			else// if (tokenIndex == 0)
+			else
 			{
+				source.Tokens.Remove(op);
 				oper = Operator.GetInverse(oper);
 				orientation = InsertOrientation.Right;
 			}
-			//if (operationIndex < tokenIndex)
-			//{
-			//	orientation = InsertOrientation.Left;
-			//}
-			//else
-			//{
-			//	orientation = InsertOrientation.Right;
-			//}
 
+			source.Tokens.Remove(term);
 
 			return new TermOperatorPair(term, oper, orientation);
 		}
@@ -244,11 +218,6 @@ namespace AlgebraicTermRewriter
 			int index = source.Tokens.IndexOf(token);
 			if (index == source.TokenCount - 1) return Token.None;
 			else return source.TokenAt(index + 1);
-		}
-
-		public static TermOperatorPair Extract(this Expression source, IToken token)
-		{
-			return source.Extract(source.Tokens.IndexOf(token));
 		}
 
 		public static bool OperatorsAllSame(this Expression source)

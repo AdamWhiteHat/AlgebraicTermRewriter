@@ -201,7 +201,7 @@ namespace RewriterTests
 			Equation exp = MathParser.ParseEquation(eEquation1);
 			Print(exp.ToString());
 
-			TermOperatorPair pair = exp.LeftHandSide.Extract(2);
+			TermOperatorPair pair = exp.LeftHandSide.Extract((ITerm)exp.LeftHandSide.TokenAt(2), (IOperator)exp.LeftHandSide.TokenAt(1));
 
 			Print(exp.ToString());
 			Print("Extracted: " + pair.ToString());
@@ -224,7 +224,7 @@ namespace RewriterTests
 			Equation exp = MathParser.ParseEquation(eEquation1);
 			Print(exp.ToString());
 
-			TermOperatorPair pair = exp.LeftHandSide.Extract(0);
+			TermOperatorPair pair = exp.LeftHandSide.Extract((ITerm)exp.LeftHandSide.TokenAt(0), (IOperator)exp.LeftHandSide.TokenAt(1));
 
 			Print(exp.ToString());
 			Print("Extracted: " + pair.ToString());

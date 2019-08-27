@@ -108,7 +108,6 @@ namespace AlgebraicTermRewriter
 
 			int tIndex = source.Tokens.IndexOf(term);
 
-
 			InsertOrientation orientation = InsertOrientation.Either;
 			if (tIndex == 0)
 			{
@@ -116,18 +115,16 @@ namespace AlgebraicTermRewriter
 				{
 					source.Tokens.Remove(op);
 				}
-				
-				oper = Operator.GetInverse(oper);
 				orientation = InsertOrientation.Right;
-				
+
 			}
 			else
 			{
 				source.Tokens.Remove(op);
-				oper = Operator.GetInverse(oper);
 				orientation = InsertOrientation.Right;
 			}
 
+			oper = Operator.GetInverse(oper);
 			source.Tokens.Remove(term);
 
 			return new TermOperatorPair(term, oper, orientation);
@@ -229,96 +226,5 @@ namespace AlgebraicTermRewriter
 			return (count == 1 && operators.Count() != 1);
 		}
 	}
-
-	#region Unused / Dead code
-	//public static void CombineVariables(this Expression source)
-	//{
-	//	var vars = source.Variables.Select(e => (e as IVariable).Value).ToList();
-	//	var distinctVars = vars.Distinct();
-	//
-	//	if (distinctVars.Count() == vars.Count())
-	//	{
-	//		return;
-	//	}
-	//
-	//	string tokens = string.Join("", source.Tokens.Select(e => e.Symbol[0]));
-	//
-	//	var found = new List<Tuple<char, List<int>>>();
-	//	foreach (char distinct in distinctVars)
-	//	{
-	//		List<int> indices = Enumerable.Range(0, tokens.Length - 1).Where(i => distinct.Equals(tokens[i])).ToList();
-	//
-	//		if (indices.Count > 1)
-	//		{
-	//			found.Add(new Tuple<char, List<int>>(distinct, indices));
-	//		}
-	//	}
-	//
-	//	if (!found.Any()) return;
-	//
-	//	found = found.OrderBy(tup => tup.Item2.Count).ToList();
-	//
-	//	Tuple<char, List<int>> first = found.First();
-	//
-	//	int value = 0;
-	//	int insertPosition = -1;
-	//	foreach (int index in first.Item2)
-	//	{
-	//		if (index == 0)
-	//		{
-	//			value = 1;
-	//			insertPosition = 0;
-	//			continue;
-	//		}
-	//
-	//		IToken token = source.TokenAt(index);
-	//
-	//		IOperator left = source.LeftOfToken(token) as IOperator;
-	//
-	//		if (left.Symbol == "+")
-	//		{
-	//			value += 1;
-	//			insertPosition = index;
-	//
-	//		}
-	//		else if (left.Symbol == "-")
-	//		{
-	//			value -= 1;
-	//			insertPosition = index - 1;
-	//		}
-	//		else if (left.Symbol == "*")
-	//		{
-	//			IToken leftLeft = source.LeftOfToken(left);
-	//			if (leftLeft != Token.None && leftLeft.Type == TokenType.Number)
-	//			{
-	//				int multiplyer = (leftLeft as INumber).Value;
-	//
-	//				IToken leftLeftLeft = source.LeftOfToken(leftLeft);
-	//
-	//				if (leftLeftLeft.Symbol == "-")
-	//				{
-	//					value -= multiplyer;
-	//					insertPosition = index - 3;
-	//				}
-	//				else //if (leftLeftLeft == Token.None || leftLeftLeft.Symbol == "+")
-	//				{
-	//					value += multiplyer;
-	//					insertPosition = index - 2;
-	//				}
-	//			}
-	//			else
-	//			{
-	//				value += 1;
-	//				insertPosition = index;
-	//			}
-	//		}
-	//		else
-	//		{
-	//			value += 1;
-	//			insertPosition = index;
-	//		}
-	//	}
-	//}
-	#endregion
 
 }

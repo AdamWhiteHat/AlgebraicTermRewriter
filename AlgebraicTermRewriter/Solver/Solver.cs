@@ -63,17 +63,6 @@ namespace AlgebraicTermRewriter
 				return;
 			}
 
-			//if (eq.RightHandSide.Variables.Any())
-			//{
-			//	eq.OrientEquation();
-			//}
-
-			//Expression left = eq.LeftHandSide;
-			//Expression right = eq.RightHandSide;
-
-			//bool leftHasVariables = Left.Variables.Any();
-			//bool rightHasVariables = Right.Variables.Any();
-
 			if (LeftHasVariables && RightHasVariables)
 			{
 				SolveForVariablesOnBothSide(eq);
@@ -108,32 +97,6 @@ namespace AlgebraicTermRewriter
 				AddSolvedVariable(Left.Variables.Single(), Right.Numbers.Single());
 				return;
 			}
-			//else if (RightHasVariables)
-			//{
-			//	if (Right.Variables.Count() > 1)
-			//	{
-			//		SolveForMultipleVariables(Left);
-			//	}
-
-			//	if (!Right.IsVariableIsolated)
-			//	{
-			//		IsolateSingleVariable(eq, SideOfEquation.Right);
-			//	}
-
-			//	if (!Right.IsVariableIsolated)
-			//	{
-			//		throw new Exception("Failed to isolate RightHandSide.");
-			//	}
-
-			//	if (!Left.IsSimplified)
-			//	{
-			//		throw new Exception("Failed to simplify LeftHandSide.");
-			//	}
-
-			//	Solutions.Add(eq.ToString());
-			//	AddSolvedVariable(Right.Variables.Single(), Left.Numbers.Single());
-			//	return;
-			//}
 
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}

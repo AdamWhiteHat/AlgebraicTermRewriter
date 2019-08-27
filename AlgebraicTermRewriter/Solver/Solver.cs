@@ -132,42 +132,98 @@ namespace AlgebraicTermRewriter
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
 
-		
+
+		/// <summary>
+		/// Finds all numbers and their associated operations.
+		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
+		/// Returns a list of such tuples, ordered by precedence in ascending order.
+		/// </summary>
+		/// <returns>A list of tuples of the form: (precedence, index), ordered by precedence in ascending order.</returns>
+		private static List<Tuple<int, int>> GetPrecedenceIndexPairs(Expression from)
+		{
+			List<Tuple<int, int>> results = new List<Tuple<int, int>>();
+
+			foreach (INumber candidate in from.Numbers)
+			{
+				int index = from.Tokens.IndexOf(candidate);
+
+				IToken op = null;
+
+				if (index == 0)
+				{
+					op = from.RightOfToken(candidate);
+					if (op.Contents == "/")
+					{
+						IToken alternative = from.RightOfToken(op);
+						index = from.Tokens.IndexOf(alternative);
+					}
+				}
+				else
+				{
+					op = from.LeftOfToken(candidate);
+				}
+
+				IOperator operation = op as IOperator;
+				if (operation == null)
+				{
+					throw new Exception("Was expecting to find Operator.");
+				}
+
+				int precedence = ParserTokens.PrecedenceDictionary[operation.Symbol];
+
+				if (operation.Symbol == '/') precedence += 1; // Prefer other operations first
+				if (operation.Symbol == '^') continue; // One does not simply negate an exponent and move it to the other side...
+
+				results.Add(new Tuple<int, int>(precedence, index));
+			}
+
+			return results.OrderBy(tup => tup.Item1).ToList();
+		}
+
 		private static void IsolateSingleVariable(Equation eq)
 		{
 			Expression from = null;
 			Expression to = null;
 
+			eq.EnsureVariableOnLeft();
+
 			while (true)
 			{
-				eq.EnsureVariableOnLeft();
-
 				from = eq.LeftHandSide;
 				to = eq.RightHandSide;
 
-				IToken toExtract = from.Numbers.FirstOrDefault();
-
-				if (toExtract == null)
+				if (!from.Numbers.Any())
 				{
 					break;
 				}
 
-				int extractIndex = from.Tokens.IndexOf(toExtract);
+				List<Tuple<int, int>> precedenceIndexList = GetPrecedenceIndexPairs(from);
+				if (!precedenceIndexList.Any())
+				{
+					break;
+				}
+
+				int extractIndex = precedenceIndexList.First().Item2;
+				IToken extractTerm = from.Tokens.ElementAtOrDefault(extractIndex);
+				if (extractTerm == null)
+				{
+					throw new Exception("Index does not exist! GetPrecedenceIndexPairs() returned an invalid index positions.");
+				}
 
 				IToken op = null;
 
-				if (from.TokenCount - 1 == extractIndex)
+				if (extractIndex == 0)
 				{
-					op = from.LeftOfToken(toExtract);
+					op = from.RightOfToken(extractTerm);
+					if (op.Contents == "/")
+					{
+						extractTerm = from.RightOfToken(op);
+						extractIndex = from.Tokens.IndexOf(extractTerm);
+					}
 				}
 				else
 				{
-					op = from.RightOfToken(toExtract);
-					if (op.Contents == "/")
-					{
-						toExtract = from.RightOfToken(op);
-						extractIndex = from.Tokens.IndexOf(toExtract);
-					}
+					op = from.LeftOfToken(extractTerm);
 				}
 
 				TermOperatorPair extracted = from.Extract(extractIndex);

@@ -51,7 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ProblemStatement001.cs" />
+    <Compile Include="BasicFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleEquations.cs" />
     <Compile Include="SystemsOfEquations.cs" />

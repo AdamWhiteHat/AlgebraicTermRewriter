@@ -7,7 +7,7 @@ using AlgebraicTermRewriter;
 namespace RewriterTests
 {
 	[TestClass]
-	public class ProblemStatement001
+	public class BasicFunctions
 	{
 		static string[] problemStatement =
 			   new string[]

@@ -32,9 +32,38 @@ namespace AlgebraicTermRewriter
 			{'^', Associativity.Right}
 		};
 
+		public static bool IsOperatorOrNull(char symbol)
+		{
+			if (symbol == '\0')
+			{
+				return true;
+			}
+			if (ParserTokens.Operators.Contains(symbol) || symbol == '(')
+			{
+				return true;
+			}
+			return false;
+		}
+
+		public static bool IsNumericOrUnary(char symbol)
+		{
+			if (IsNumeric(symbol.ToString()) || symbol == '-' || symbol == ')') { return true; }
+			return false;
+		}
+
 		public static bool IsNumeric(string text)
 		{
-			return string.IsNullOrWhiteSpace(text) ? false : text.All(c => Numbers.Contains(c));
+			if (string.IsNullOrWhiteSpace(text)) { return false; }
+
+			int parseOut = 0;
+			if (int.TryParse(text, out parseOut)) //text.All(c => Numbers.Contains(c));
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
 }

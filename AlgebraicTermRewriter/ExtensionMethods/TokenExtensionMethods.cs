@@ -82,7 +82,6 @@ namespace AlgebraicTermRewriter
 		public static Tuple<List<IToken>, int> FindLongestSubsetWhere(this IEnumerable<IToken> source, Func<IToken, bool> predicate)
 		{
 			int counter = 0;
-			int length = source.Count();
 
 			List<Tuple<List<IToken>, int>> subSets = new List<Tuple<List<IToken>, int>>();
 			List<IToken> sequence = new List<IToken>();

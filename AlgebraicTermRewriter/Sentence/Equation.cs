@@ -33,7 +33,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			return LeftHandSide.ToString() + ComparativeOperator.AsString() + RightHandSide.ToString();
+			return string.Join(" ", new string[] { LeftHandSide.ToString(), ComparativeOperator.AsString(), RightHandSide.ToString() });
 		}
 	}
 }

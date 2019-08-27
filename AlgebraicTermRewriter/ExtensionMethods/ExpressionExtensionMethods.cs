@@ -25,7 +25,7 @@ namespace AlgebraicTermRewriter
 
 			source.Tokens.RemoveRange(range.Item1, range.Item2);
 
-			int insertIndex = range.Item1 == 0 ? 0 : range.Item1 - 1;
+			int insertIndex = range.Item1 == 0 ? 0 : range.Item1;
 
 			if (newValue.Value == 0)
 			{
@@ -229,7 +229,7 @@ namespace AlgebraicTermRewriter
 	}
 
 
-	#region Unused / Dead code
+
 	public static class ExpressionExtensionMethods_Manipulations
 	{
 		public static IToken LeftOfToken(this Expression source, IToken token)
@@ -259,43 +259,38 @@ namespace AlgebraicTermRewriter
 
 			return (count == 1 && operators.Count() != 1);
 		}
-		public static bool TermsAllSame(this Expression source, TermType type)
-		{
-			TokenType tokenType = type.GetTokenType();
-			return source.Tokens.Select(e => e.Type).Same();
-		}
 	}
-	#endregion
 
+	#region Unused / Dead code
 	//public static void CombineVariables(this Expression source)
 	//{
 	//	var vars = source.Variables.Select(e => (e as IVariable).Value).ToList();
 	//	var distinctVars = vars.Distinct();
-
+	//
 	//	if (distinctVars.Count() == vars.Count())
 	//	{
 	//		return;
 	//	}
-
+	//
 	//	string tokens = string.Join("", source.Tokens.Select(e => e.Symbol[0]));
-
+	//
 	//	var found = new List<Tuple<char, List<int>>>();
 	//	foreach (char distinct in distinctVars)
 	//	{
 	//		List<int> indices = Enumerable.Range(0, tokens.Length - 1).Where(i => distinct.Equals(tokens[i])).ToList();
-
+	//
 	//		if (indices.Count > 1)
 	//		{
 	//			found.Add(new Tuple<char, List<int>>(distinct, indices));
 	//		}
 	//	}
-
+	//
 	//	if (!found.Any()) return;
-
+	//
 	//	found = found.OrderBy(tup => tup.Item2.Count).ToList();
-
+	//
 	//	Tuple<char, List<int>> first = found.First();
-
+	//
 	//	int value = 0;
 	//	int insertPosition = -1;
 	//	foreach (int index in first.Item2)
@@ -306,16 +301,16 @@ namespace AlgebraicTermRewriter
 	//			insertPosition = 0;
 	//			continue;
 	//		}
-
+	//
 	//		IToken token = source.TokenAt(index);
-
+	//
 	//		IOperator left = source.LeftOfToken(token) as IOperator;
-
+	//
 	//		if (left.Symbol == "+")
 	//		{
 	//			value += 1;
 	//			insertPosition = index;
-
+	//
 	//		}
 	//		else if (left.Symbol == "-")
 	//		{
@@ -328,9 +323,9 @@ namespace AlgebraicTermRewriter
 	//			if (leftLeft != Token.None && leftLeft.Type == TokenType.Number)
 	//			{
 	//				int multiplyer = (leftLeft as INumber).Value;
-
+	//
 	//				IToken leftLeftLeft = source.LeftOfToken(leftLeft);
-
+	//
 	//				if (leftLeftLeft.Symbol == "-")
 	//				{
 	//					value -= multiplyer;
@@ -353,9 +348,8 @@ namespace AlgebraicTermRewriter
 	//			value += 1;
 	//			insertPosition = index;
 	//		}
-
-
 	//	}
-
 	//}
+	#endregion
+
 }

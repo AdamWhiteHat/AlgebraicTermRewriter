@@ -66,16 +66,16 @@ namespace AlgebraicTermRewriter
 				throw new ArgumentException("An expression contains no comparative symbols. You want an Equation.");
 			}
 
-			Stack<char> stack = new Stack<char>(input.Replace(" ", "").Reverse());
-
 			List<IToken> tokens = new List<IToken>();
+
+			Stack<char> stack = new Stack<char>(input.Replace(" ", "").Reverse());
 			while (stack.Any())
 			{
 				IToken newToken = null;
 
 				char c = stack.Pop();
 
-				if (Types.Numbers.Contains(c))
+				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))
 				{
 					string value = c.ToString();
 					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
@@ -93,6 +93,10 @@ namespace AlgebraicTermRewriter
 				else if (Types.Variables.Contains(c))
 				{
 					newToken = new Variable(c);
+				}
+				else
+				{
+					throw new FormatException($"Unrecognized token: '{c}'.");
 				}
 
 				tokens.Add(newToken);

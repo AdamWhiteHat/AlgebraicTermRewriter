@@ -22,8 +22,11 @@ namespace AlgebraicTermRewriter
 				{
 					if (token.Length > 1)
 					{
-						if (!ParserTokens.IsNumeric(token)) throw new Exception("Operators and operands must be separated by a space.");
-						stack.Push(token);
+						if (ParserTokens.IsNumeric(token))
+						{
+							stack.Push(token);
+						}
+						else { throw new Exception("Operators and operands must be separated by a space."); }
 					}
 					else
 					{
@@ -35,7 +38,16 @@ namespace AlgebraicTermRewriter
 						}
 						else if (ParserTokens.Operators.Contains(tokenChar))
 						{
-							if (stack.Count < 2) throw new FormatException("The algebraic string has not sufficient values in the expression for the number of operators.");
+							if (stack.Count < 2)
+							{
+								if (tokenChar == '-')
+								{
+									string val = $"-{stack.Pop()}";
+									stack.Push(val);
+									continue;
+								}
+								else { throw new FormatException("The algebraic string has not sufficient values in the expression for the number of operators."); }
+							}
 
 							string r = stack.Pop();
 							string l = stack.Pop();
@@ -45,9 +57,8 @@ namespace AlgebraicTermRewriter
 
 							bool parseSuccess = int.TryParse(r, out rhs);
 							parseSuccess &= int.TryParse(l, out lhs);
-							parseSuccess &= (rhs != int.MinValue && lhs != int.MinValue);
 
-							if (!parseSuccess) throw new Exception("Unable to parse valueStack characters to Int32.");
+							if (!parseSuccess) { throw new Exception("Unable to parse valueStack characters to Int32."); }
 
 							int value = int.MinValue;
 							if (tokenChar == '+')
@@ -70,26 +81,28 @@ namespace AlgebraicTermRewriter
 							{
 								value = (int)Math.Pow(lhs, rhs);
 							}
+							else { throw new Exception(string.Format("Unrecognized token '{0}'.", tokenChar)); }
+
 
 							if (value != int.MinValue)
 							{
 								stack.Push(value.ToString());
 							}
-							else throw new Exception("Value never got set.");
+							else { throw new Exception("Value never got set."); }
 						}
-						else throw new Exception(string.Format("Unrecognized character '{0}'.", tokenChar));
+						else { throw new Exception(string.Format("Unrecognized character '{0}'.", tokenChar)); }
 					}
 				}
-				else throw new Exception("Token length is less than one.");
+				else { throw new Exception("Token length is less than one."); }
 			}
 
 			if (stack.Count == 1)
 			{
 				int result = 0;
-				if (!int.TryParse(stack.Pop(), out result)) throw new Exception("Last value on stack could not be parsed into an integer.");
+				if (!int.TryParse(stack.Pop(), out result)) { throw new Exception("Last value on stack could not be parsed into an integer."); }
 				return result;
 			}
-			else throw new Exception("The input has too many values for the number of operators.");
+			else { throw new Exception("The input has too many values for the number of operators."); }
 
 		} // method
 	}

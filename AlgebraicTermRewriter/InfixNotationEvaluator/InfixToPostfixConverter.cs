@@ -15,16 +15,42 @@ namespace AlgebraicTermRewriter
 			output.Add(' ');
 		}
 
+		private enum ExpectingType
+		{
+			BinaryOperator,
+			UnaryOrNumber
+		}
+
 		public static string Convert(string infixNotationString)
 		{
 			if (string.IsNullOrWhiteSpace(infixNotationString)) throw new ArgumentException("Argument infixNotationString must not be null, empty or whitespace.", "infixNotationString");
 
+			ExpectingType expectingType = ExpectingType.UnaryOrNumber;
+
+			char lastChar = '\0';
 			string number = string.Empty;
 			List<string> enumerableInfixTokens = new List<string>();
 			string inputString = new string(infixNotationString.Where(c => ParserTokens.AllowedCharacters.Contains(c)).ToArray());
 			foreach (char c in inputString)
 			{
-				if (ParserTokens.Operators.Contains(c) || "()".Contains(c))
+				if (ParserTokens.IsOperatorOrNull(lastChar))
+				{
+					expectingType = ExpectingType.UnaryOrNumber;
+				}
+				else if (ParserTokens.IsNumericOrUnary(lastChar))
+				{
+					expectingType = ExpectingType.BinaryOperator;
+				}
+				else
+				{
+					throw new Exception($"Unexpected type '{(string.IsNullOrWhiteSpace(enumerableInfixTokens.LastOrDefault()) ? "" : enumerableInfixTokens.Last())}'.");
+				}
+
+				if (ParserTokens.Numbers.Contains(c) || (c == '-' && expectingType == ExpectingType.UnaryOrNumber))
+				{
+					number += c.ToString();
+				}
+				else if (c == '(')
 				{
 					if (number.Length > 0)
 					{
@@ -33,11 +59,28 @@ namespace AlgebraicTermRewriter
 					}
 					enumerableInfixTokens.Add(c.ToString());
 				}
-				else if (ParserTokens.Numbers.Contains(c))
+				else if (expectingType == ExpectingType.BinaryOperator)
 				{
-					number += c.ToString();
+					if (ParserTokens.Operators.Contains(c) || ")".Contains(c))
+					{
+						if (number.Length > 0)
+						{
+							enumerableInfixTokens.Add(number);
+							number = string.Empty;
+						}
+						enumerableInfixTokens.Add(c.ToString());
+					}
+					else
+					{
+						throw new Exception($"Unexpected character '{c}'. Was expecting: BinaryOperator");
+					}
 				}
-				else throw new Exception(string.Format("Unexpected character '{0}'.", c));
+				else
+				{
+					throw new Exception($"Unexpected character '{c}'. Was expecting: UnaryOrNumber");
+				}
+
+				lastChar = c;
 			}
 
 			if (number.Length > 0)

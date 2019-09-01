@@ -11,6 +11,7 @@ namespace AlgebraicTermRewriter
 		public char Symbol { get; private set; }
 		public string Contents { get; private set; }
 		public TokenType Type { get { return TokenType.Operator; } }
+
 		public Operator(char symbol)
 		{
 
@@ -42,6 +43,11 @@ namespace AlgebraicTermRewriter
 				case '/':
 					total = l / r;
 					break;
+				case '^':
+					total = (int)Math.Pow(l, r);
+					break;
+				default:
+					throw new NotImplementedException(Symbol.ToString());
 			}
 
 			return new Number(total);

@@ -66,6 +66,7 @@ namespace AlgebraicTermRewriter
 			if (LeftHasVariables && RightHasVariables)
 			{
 				SolveForVariablesOnBothSide(eq);
+				Solutions.Add(eq.ToString());
 				return;
 			}
 
@@ -75,22 +76,21 @@ namespace AlgebraicTermRewriter
 			{
 				if (Left.Variables.Count() > 1)
 				{
-					SolveForMultipleVariables(Left);
+					SolveForMultipleVariables(eq);
 				}
-
-				if (!Left.IsVariableIsolated)
+				else if (!Left.IsVariableIsolated)
 				{
 					IsolateSingleVariable(eq);
 				}
 
 				if (!Left.IsVariableIsolated)
 				{
-					throw new Exception("Failed to isolate LeftHandSide.");
+					throw new Exception($"Failed to isolate LeftHandSide. Equation: '{eq.ToString()}'");
 				}
 
 				if (!Right.IsSimplified)
 				{
-					throw new Exception("Failed to simplify RightHandSide.");
+					throw new Exception($"Failed to simplify RightHandSide. Equation: '{eq.ToString()}'");
 				}
 
 				Solutions.Add(eq.ToString());
@@ -100,7 +100,7 @@ namespace AlgebraicTermRewriter
 
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
-		
+
 		/// <summary>
 		/// Finds all numbers and their associated operations.
 		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
@@ -111,7 +111,11 @@ namespace AlgebraicTermRewriter
 		{
 			var results = new List<Tuple<IOperator, ITerm>>();
 
-			foreach (INumber candidate in from.Numbers)
+			//foreach (INumber candidate in from.Numbers)
+			//{
+			//	ITerm term = candidate;
+
+			foreach (ITerm candidate in from.Terms)
 			{
 				ITerm term = candidate;
 
@@ -143,21 +147,36 @@ namespace AlgebraicTermRewriter
 				{
 					throw new Exception("Was expecting to find Operator.");
 				}
-								
+
 				results.Add(new Tuple<IOperator, ITerm>(operation, term));
 			}
 
-			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1)).ToList();
+			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1))
+							.ThenBy(tup => GetTermSolveOrder(tup.Item2))
+							.ToList();
 		}
 
 		private static int GetOperatorSolveOrder(IOperator operation)
-		{			
+		{
 			int weight = ParserTokens.PrecedenceDictionary[operation.Symbol];
 
 			if (operation.Symbol == '/') weight += 1; // Prefer other operations first
 			if (operation.Symbol == '^') weight += 2; // One does not simply negate an exponent and move it to the other side...
 
 			return weight;
+		}
+
+		private static int GetTermSolveOrder(ITerm term)
+		{
+			if (term.Type == TokenType.Variable)
+			{
+				return 0;
+			}
+			else if (term.Type == TokenType.Number)
+			{
+				return 1;
+			}
+			return 2;
 		}
 
 		private static void IsolateSingleVariable(Equation eq)
@@ -177,6 +196,11 @@ namespace AlgebraicTermRewriter
 					break;
 				}
 
+				//if (from.Variables.Any() && to.Variables.Any())
+				//{
+				//}
+				//else
+				//{
 				List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
 				if (!OperatorTermIndexList.Any())
 				{
@@ -187,7 +211,7 @@ namespace AlgebraicTermRewriter
 
 				TermOperatorPair extracted = from.Extract(next.Item2, next.Item1);
 				to.Insert(extracted);
-				
+				//}
 
 				to.CombineArithmeticTokens();
 				from.CombineArithmeticTokens();
@@ -201,18 +225,23 @@ namespace AlgebraicTermRewriter
 
 				eq.EnsureVariableOnLeft();
 			}
-
-
 		}
 
-		private void SolveForMultipleVariables(Expression ex)
+		private void SolveForMultipleVariables(Equation eq)
 		{
-			throw new NotImplementedException();
+			//int leftVarsCount = Left.Variables.Count();
+			//int rightVarsCount = Right.Variables.Count();
+
+			//IVariable firstVar = Left.Variables.First();
+
+			IsolateSingleVariable(eq);
 		}
 
 		private void SolveForVariablesOnBothSide(Equation eq)
 		{
-			throw new NotImplementedException();
+			//IVariable firstVar = Left.Variables.First();
+
+			IsolateSingleVariable(eq);
 		}
 
 		private void AddSolvedVariable(IVariable variable, INumber numericValue)

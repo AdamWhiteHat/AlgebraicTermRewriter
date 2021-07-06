@@ -81,17 +81,33 @@ namespace RewriterTests
 		}
 		*/
 
-		/*	NOT IMPLEMENTED YET
-		
 		[TestMethod]
-		public void TestSolveForVariablesOnBothSide()
+		public void TestSolveForVariablesOnBothSides001()
+		{
+			// Not Implemented yet
+			string[] EquationA = new string[] { "5 * x - 6 = 3 * x + 8", "x = 7" };
+
+			TestSolveArithmeticHelper(EquationA);
+		}
+
+		[TestMethod]
+		public void TestSolveForVariablesOnBothSides002()
 		{
 			// Not Implemented yet
 			string[] EquationA = new string[] { "5 * x - 6 = 3 * x - 8", "x = -1" };
 
 			TestSolveArithmeticHelper(EquationA);
 		}
-		*/
+
+		[TestMethod]
+		public void TestSolveForMultipleVariables()
+		{
+			// Not Implemented yet
+			string[] EquationA = new string[] { "5 * x + 6 * y = 3 * -8", "x = -1" };
+
+			TestSolveArithmeticHelper(EquationA);
+		}
+
 
 		private void TestSolveArithmeticHelper(string[] equation)
 		{
@@ -151,7 +167,7 @@ namespace RewriterTests
 			string expected7 = "50";
 
 			string equation8 = "y+4*x-9/z+2*y^2";
-			string expected8 = "y + 4 * x - 9 / z + 2 * y ^ 2";
+			string expected8 = "y + 4 * x + -9 / z + 2 * y ^ 2";
 
 			CombineArithmeticTokens(equation0, expected0);
 			CombineArithmeticTokens(equation1, expected1);
@@ -162,6 +178,16 @@ namespace RewriterTests
 			CombineArithmeticTokens(equation6, expected6);
 			CombineArithmeticTokens(equation7, expected7);
 			CombineArithmeticTokens(equation8, expected8);
+		}
+
+
+		[TestMethod]
+		public void TestCombineArithmeticTokens_Negatives()
+		{
+			string equation1 = "3 * x - 8 + 6";
+			string expected1 = "3 * x + -2";
+
+			CombineArithmeticTokens(equation1, expected1);
 		}
 
 

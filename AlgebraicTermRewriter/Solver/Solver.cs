@@ -111,15 +111,11 @@ namespace AlgebraicTermRewriter
 		{
 			var results = new List<Tuple<IOperator, ITerm>>();
 
-			//foreach (INumber candidate in from.Numbers)
-			//{
-			//	ITerm term = candidate;
-
-			foreach (ITerm candidate in from.Terms)
+			foreach (INumber candidate in from.Numbers)
 			{
 				ITerm term = candidate;
 
-				int termIndex = from.Tokens.IndexOf(term);
+				int termIndex = from.IndexOf(term);
 
 				IToken op = null;
 
@@ -152,7 +148,6 @@ namespace AlgebraicTermRewriter
 			}
 
 			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1))
-							.ThenBy(tup => GetTermSolveOrder(tup.Item2))
 							.ToList();
 		}
 
@@ -166,15 +161,29 @@ namespace AlgebraicTermRewriter
 			return weight;
 		}
 
-		private static int GetTermSolveOrder(ITerm term)
+		private static int GetTermSolveOrder(ITerm term, IOperator operation)
 		{
 			if (term.Type == TokenType.Variable)
 			{
-				return 0;
+				if (operation.Symbol == '*' || operation.Symbol == '/')
+				{
+					return 0;
+				}
+				else
+				{
+					return 1;
+				}
 			}
 			else if (term.Type == TokenType.Number)
 			{
-				return 1;
+				if (operation.Symbol == '*' || operation.Symbol == '/')
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
 			}
 			return 2;
 		}
@@ -196,34 +205,72 @@ namespace AlgebraicTermRewriter
 					break;
 				}
 
-				//if (from.Variables.Any() && to.Variables.Any())
-				//{
-				//}
-				//else
-				//{
-				List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
-				if (!OperatorTermIndexList.Any())
+				bool moveVariableMultiple = false;
+				if ((from.Variables.Any() && to.Variables.Any()) /*|| eq.GetDistinctVariableCount() > 1*/)
 				{
-					break;
+					if (
+						!(from.Contains("-") || from.Contains("+"))
+						&&
+						from.Contains("*")
+						&&
+						from.Numbers.Any()
+						&&
+						to.Contains("*")
+						&&
+						to.Numbers.Any()
+						)
+					{
+						moveVariableMultiple = true;
+					}
 				}
 
-				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
+				if (moveVariableMultiple)
+				{
+					from = eq.RightHandSide;
+					to = eq.LeftHandSide;
+					MoveVariableTerm(from, to);
+				}
+				else
+				{
+					MoveNumberTerm(from, to);
+				}
 
-				TermOperatorPair extracted = from.Extract(next.Item2, next.Item1);
-				to.Insert(extracted);
-				//}
-
-				to.CombineArithmeticTokens();
-				from.CombineArithmeticTokens();
+				to.Simplify();
+				from.Simplify();
 
 				IToken leadingToken = from.Tokens.First();
 				if (leadingToken.Contents == "-")
 				{
-					to.SetToMultiplicativeInverse2();
-					from.SetToMultiplicativeInverse2();
+					to.SetToMultiplicativeInverse();
+					from.SetToMultiplicativeInverse();
 				}
 
 				eq.EnsureVariableOnLeft();
+			}
+		}
+
+		private static void MoveVariableTerm(Expression from, Expression to)
+		{
+			IVariable variable = from.Variables.First();
+
+			SubExpression variableGroup = from.GetVariableProductSubExpression(variable);
+			OperatorExpressionPair extracted = from.Extract(new Operator('+'), variableGroup);
+
+			if (extracted != null)
+			{
+				to.Insert(extracted);
+			}
+		}
+
+		private static void MoveNumberTerm(Expression from, Expression to)
+		{
+			List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
+			if (OperatorTermIndexList.Any())
+			{
+				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
+
+				OperatorExpressionPair extracted = from.Extract(next.Item1, next.Item2);
+				to.Insert(extracted);
 			}
 		}
 
@@ -251,8 +298,8 @@ namespace AlgebraicTermRewriter
 
 		private bool IsArithmeticEquasionTrue(Equation eq)
 		{
-			eq.LeftHandSide.CombineArithmeticTokens();
-			eq.RightHandSide.CombineArithmeticTokens();
+			eq.LeftHandSide.Simplify();
+			eq.RightHandSide.Simplify();
 
 			var left = eq.LeftHandSide;
 			var right = eq.RightHandSide;
@@ -284,7 +331,7 @@ namespace AlgebraicTermRewriter
 		{
 			if (ex.OnlyArithmeticTokens())
 			{
-				ex.CombineArithmeticTokens();
+				ex.Simplify();
 				if (!ex.IsSimplified) throw new Exception("Expected the expression was arithmetic tokens only, but failed to simplify.");
 				Solutions.Add(ex.ToString());
 				PrintStatus();

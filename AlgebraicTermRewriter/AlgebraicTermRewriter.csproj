@@ -41,8 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sentence\SubExpression.cs" />
     <Compile Include="Tokens\Token.cs" />
-    <Compile Include="Tokens\TermOperatorPair.cs" />
+    <Compile Include="Tokens\OperatorExpressionPair.cs" />
     <Compile Include="Tokens\Number.cs" />
     <Compile Include="Tokens\Operator.cs" />
     <Compile Include="Tokens\Variable.cs" />

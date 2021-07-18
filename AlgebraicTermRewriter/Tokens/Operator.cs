@@ -9,18 +9,16 @@ namespace AlgebraicTermRewriter
 	public class Operator : IOperator
 	{
 		public char Symbol { get; private set; }
-		public string Contents { get; private set; }
+		public string Contents { get { return Symbol.ToString(); } }
 		public TokenType Type { get { return TokenType.Operator; } }
 
 		public Operator(char symbol)
 		{
-
 			if (!Types.Operators.Contains(symbol))
 			{
 				throw new ArgumentException($"{nameof(symbol)} does not match any of the valid operator symbols.");
 			}
 			Symbol = symbol;
-			Contents = symbol.ToString();
 		}
 
 		public Number ApplyOperation(Number lhs, Number rhs)
@@ -72,7 +70,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			return Symbol.ToString();
+			return Contents;
 		}
 	}
 }

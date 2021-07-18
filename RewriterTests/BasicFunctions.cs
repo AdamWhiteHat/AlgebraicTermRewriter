@@ -68,6 +68,29 @@ namespace RewriterTests
 		}
 
 		[TestMethod]
+		public void TestSimplify_AddVariableGroups()
+		{
+			// "5 * x + 3 * x"
+			string expected = "8 * x";
+			Expression expr = new Expression(new IToken[] { new Number(5), new Operator('*'), new Variable('x'), new Operator('+'), new Number(3), new Operator('*'), new Variable('x') });
+
+			expr.Simplify();
+
+			TestAssertResults(expr, expected);
+		}
+
+		[TestMethod]
+		public void TestSimplify_UnitaryOperations()
+		{
+			string expected = "14";
+			Expression expr = new Expression(new IToken[] { new Operator('+'), new Number(14) });
+
+			expr.Simplify();
+
+			TestAssertResults(expr, expected);
+		}
+
+		[TestMethod]
 		public void TestExtractToken()
 		{
 			Expression e1 = exp.Clone();
@@ -152,23 +175,17 @@ namespace RewriterTests
 			Print($"Complexity: {complexity}");
 		}
 
+		private void TestAssertResults(Expression expr, string expected)
+		{
+			string actual = expr.ToString();
 
+			Print($"Result: [{actual}]           Expecting: ({expected})");
+			Print();
+			Print("-----");
+			Print();
 
-		//}
-
-		//[TestMethod]
-		//public void TestSerialize()
-		//{
-		//}		
-
-
-
-
-
-
-
-
-
+			Assert.AreEqual(expected, actual);
+		}
 
 		public void Print(string message = " ") { Print("{0}", message); }
 		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }

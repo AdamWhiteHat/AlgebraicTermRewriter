@@ -15,15 +15,15 @@ namespace AlgebraicTermRewriter
 		Right,
 		Left
 	}
-	public class TermOperatorPair
+	public class OperatorExpressionPair
 	{
-		public ITerm Term { get; private set; }
+		public SubExpression Expr { get; private set; }
 		public IOperator Operator { get; private set; }
 		public InsertOrientation Orientation { get; private set; }
 
-		public TermOperatorPair(ITerm term, IOperator oper, InsertOrientation orientation)
+		public OperatorExpressionPair(IOperator oper, SubExpression expr, InsertOrientation orientation)
 		{
-			Term = term;
+			Expr = expr;
 			Operator = oper;
 			Orientation = orientation;
 		}
@@ -32,11 +32,11 @@ namespace AlgebraicTermRewriter
 		{
 			if (Orientation == InsertOrientation.Left)
 			{
-				return $"{Term}{Operator}";
+				return $"{Expr}{Operator}";
 			}
 			else
 			{
-				return $"{Operator}{Term}";
+				return $"{Operator}{Expr}";
 			}
 		}
 	}

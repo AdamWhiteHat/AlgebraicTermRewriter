@@ -42,7 +42,14 @@ namespace AlgebraicTermRewriter
 				}
 				else if (e.Type == TokenType.Operator)
 				{
-					//continue;
+					if(currentIndex == 0)
+					{
+						if(e.Contents == "-" || e.Contents == "+")
+						{
+							startIndex = currentIndex;
+						}
+					}
+					continue;
 				}
 				else
 				{

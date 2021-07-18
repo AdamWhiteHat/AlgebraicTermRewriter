@@ -8,8 +8,56 @@ namespace AlgebraicTermRewriter
 {
 	public static class ExpressionExtensionMethods_Checks
 	{
-		public static void CombineArithmeticTokens(this Expression source)
+		public static void Simplify(this Expression source)
 		{
+			// Same variable appears more than once.
+			if (source.Variables.Count() != source.Variables.Distinct().Count())
+			{
+				var variables = source.Variables.ToList();
+
+				List<SubExpression> toCombine = new List<SubExpression>();
+				foreach (IVariable variable in variables)
+				{
+					toCombine.Add(source.GetVariableProductSubExpression(variable));
+				}
+
+				string debugSource = source.ToString();
+
+				int leftIndex = source.IndexOf(toCombine[0].Last());
+				int rightIndex = source.IndexOf(toCombine[1].First());
+
+				var rightOfLeftToken = source.RightOfToken(source.TokenAt(leftIndex));
+				var leftOfRightToken = source.LeftOfToken(source.TokenAt(rightIndex));
+
+				if(rightOfLeftToken == leftOfRightToken)
+				{
+					if(rightOfLeftToken.Type == TokenType.Operator)
+					{
+						IOperator operationToken = (IOperator)rightOfLeftToken;
+
+
+
+						if (operationToken.Symbol == '+')
+						{
+
+						}
+						else if (operationToken.Symbol == '-')
+						{
+
+						}
+						else if (operationToken.Symbol == '*')
+						{
+
+						}
+						else if (operationToken.Symbol == '/')
+						{
+
+						}
+					}
+				}
+
+			}
+
 			Tuple<int, int> range = source.Tokens.GetLongestArithmeticRange();
 
 			if (range == null)
@@ -17,13 +65,12 @@ namespace AlgebraicTermRewriter
 				return;
 			}
 
-			List<IToken> arithmeticExpression = source.Tokens.GetRange(range.Item1, range.Item2);
+			List<IToken> arithmeticExpression = source.Tokens.ToList().GetRange(range.Item1, range.Item2);
 
 			string toEvaluate = string.Join("", arithmeticExpression.Select(e => e.Contents));
 
 			INumber newValue = new Number(InfixNotationEvaluator.Evaluate(toEvaluate));
-
-			source.Tokens.RemoveRange(range.Item1, range.Item2);
+			source.RemoveRange(range.Item1, range.Item2);
 
 			int insertIndex = range.Item1 == 0 ? 0 : range.Item1;
 
@@ -31,18 +78,18 @@ namespace AlgebraicTermRewriter
 			{
 				if (source.TokenCount == 0)
 				{
-					source.Tokens.Insert(0, new Number(0));
+					source.Insert(0, new Number(0));
 					return;
 				}
 				IToken op = source.TokenAt(insertIndex);
 				if (op.Contents != "*")
 				{
-					source.Tokens.RemoveAt(insertIndex);
+					source.RemoveAt(insertIndex);
 				}
 			}
 			else
 			{
-				source.Tokens.Insert(insertIndex, newValue);
+				source.Insert(insertIndex, newValue);
 			}
 		}
 
@@ -58,8 +105,8 @@ namespace AlgebraicTermRewriter
 
 					if (currentToken.Contents == variable.Contents)
 					{
-						source.Tokens.RemoveAt(index);
-						source.Tokens.InsertRange(index, expression);
+						source.RemoveAt(index);
+						source.InsertRange(index, new SubExpression(expression));
 					}
 				}
 			}
@@ -83,8 +130,8 @@ namespace AlgebraicTermRewriter
 			}
 			else if (tokenCount == 2)
 			{
-				TokenType firstType = source.Tokens[0].Type;
-				TokenType secondType = source.Tokens[1].Type;
+				TokenType firstType = source.TokenAt(0).Type;
+				TokenType secondType = source.TokenAt(1).Type;
 
 				if (firstType == secondType)
 				{
@@ -101,66 +148,124 @@ namespace AlgebraicTermRewriter
 			}
 			return 5;
 		}
-
-		public static TermOperatorPair Extract(this Expression source, ITerm term, IOperator op)
+		public static SubExpression GetVariableProductSubExpression(this Expression source, IVariable variable)
 		{
+			List<IToken> collection = new List<IToken>();
+			collection.Add(variable);
+
+			IToken current = variable;
+			IToken left = Token.None;
+			while (true)
+			{
+				left = source.LeftOfToken(current);
+				current = source.LeftOfToken(left);
+				if (current.Equals(Token.None) || left.Contents != "*")
+				{
+					break;
+				}
+				collection.Insert(0, left);
+				collection.Insert(0, current);
+			}
+
+			current = variable;
+			IToken right = Token.None;
+			while (true)
+			{
+				right = source.RightOfToken(variable);
+				current = source.RightOfToken(right);
+				if (current.Equals(Token.None) || right.Contents != "*")
+				{
+					break;
+				}
+				collection.Add(right);
+				collection.Add(current);
+			}
+
+
+			SubExpression result = new SubExpression(collection.ToArray());
+
+			int start = source.IndexOf(collection.First());
+			int count = collection.Count;
+
+			source.RemoveRange(start, count);
+			source.InsertRange(start, result);
+
+			return result;
+		}
+
+		public static OperatorExpressionPair Extract(this Expression source, IOperator op, SubExpression subExpr)
+		{
+			return Extract(source, op, subExpr.ToArray());
+		}
+
+		public static OperatorExpressionPair Extract(this Expression source, IOperator op, params IToken[] terms)
+		{
+			if (!terms.Any())
+			{
+				return null;
+			}
+
 			IOperator oper = op;
 
-			int tIndex = source.Tokens.IndexOf(term);
+			int tIndex = source.IndexOf(terms[0]);
 
 			InsertOrientation orientation = InsertOrientation.Either;
 			if (tIndex == 0)
 			{
 				if (op.Symbol != '+')
 				{
-					source.Tokens.Remove(op);
+					source.Remove(op);
 				}
 				orientation = InsertOrientation.Right;
 
 			}
 			else
 			{
-				source.Tokens.Remove(op);
+				source.Remove(op);
 				orientation = InsertOrientation.Right;
 			}
 
 			oper = Operator.GetInverse(oper);
-			source.Tokens.Remove(term);
 
-			return new TermOperatorPair(term, oper, orientation);
+			foreach (IToken term in terms)
+			{
+				source.Remove(term);
+			}
+
+			return new OperatorExpressionPair(oper, new SubExpression(terms), orientation);
 		}
 
-		public static void SetToMultiplicativeInverse2(this Expression source)
+		public static void SetToMultiplicativeInverse(this Expression source)
 		{
 			string expression = source.ToString()?.Replace(" ", "") ?? "";
 
 			if (expression.StartsWith("0"))
 			{
-				source.Tokens.RemoveAt(0);
-				source.Tokens.RemoveAt(0);
+				source.RemoveAt(0);
+				source.RemoveAt(0);
 				return;
 			}
 
 			if (expression.StartsWith("-"))
 			{
-				source.Tokens.RemoveAt(0);
+				source.RemoveAt(0);
 			}
 			else
 			{
 				if (source.TokenCount > 0)
 				{
-					INumber num = source.Tokens[0] as INumber;
+					INumber num = source.Tokens.First() as INumber;
 					if (num != null)
 					{
 						int newNum = -num.Value;
-						source.Tokens[0] = new Number(newNum);
+						source.SubExpressions[0][0] = new Number(newNum);
 						return;
 					}
 				}
 			}
 		}
 
-		public static void SetToMultiplicativeInverse(this Expression source)
+		public static void SetToMultiplicativeInverse_Old(this Expression source)
 		{
 			bool isNegative = false;
 			IToken first = null;
@@ -175,7 +280,6 @@ namespace AlgebraicTermRewriter
 					isNegative = true;
 				}
 			}
-
 
 			if (!isNegative)
 			{
@@ -192,11 +296,11 @@ namespace AlgebraicTermRewriter
 
 			if (isNegative)
 			{
-				source.Tokens.Remove(first);
-				source.Tokens.Remove(second);
+				source.Remove(first);
+				source.Remove(second);
 			}
-
 		}
+
 	}
 
 
@@ -205,14 +309,14 @@ namespace AlgebraicTermRewriter
 	{
 		public static IToken LeftOfToken(this Expression source, IToken token)
 		{
-			int index = source.Tokens.IndexOf(token);
+			int index = source.IndexOf(token);
 			if (index == 0) return Token.None;
 			else return source.TokenAt(index - 1);
 		}
 
 		public static IToken RightOfToken(this Expression source, IToken token)
 		{
-			int index = source.Tokens.IndexOf(token);
+			int index = source.IndexOf(token);
 			if (index == source.TokenCount - 1) return Token.None;
 			else return source.TokenAt(index + 1);
 		}

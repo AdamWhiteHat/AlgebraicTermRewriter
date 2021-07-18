@@ -200,7 +200,7 @@ namespace RewriterTests
 			Print($"Input: {exp.ToString()}");
 			Print();
 
-			exp.CombineArithmeticTokens();
+			exp.Simplify();
 			Print($"Result: [{exp.ToString()}]           Expecting: ({expected})");
 			Print();
 
@@ -227,7 +227,7 @@ namespace RewriterTests
 			Equation exp = MathParser.ParseEquation(eEquation1);
 			Print(exp.ToString());
 
-			TermOperatorPair pair = exp.LeftHandSide.Extract((ITerm)exp.LeftHandSide.TokenAt(2), (IOperator)exp.LeftHandSide.TokenAt(1));
+			OperatorExpressionPair pair = exp.LeftHandSide.Extract((IOperator)exp.LeftHandSide.TokenAt(1), (ITerm)exp.LeftHandSide.TokenAt(2));
 
 			Print(exp.ToString());
 			Print("Extracted: " + pair.ToString());
@@ -235,7 +235,7 @@ namespace RewriterTests
 			exp.RightHandSide.Insert(pair);
 			Print(exp.ToString());
 
-			exp.RightHandSide.CombineArithmeticTokens();
+			exp.RightHandSide.Simplify();
 			Print(exp.ToString());
 
 			Assert.AreEqual(expected, exp.ToString());
@@ -250,7 +250,7 @@ namespace RewriterTests
 			Equation exp = MathParser.ParseEquation(eEquation1);
 			Print(exp.ToString());
 
-			TermOperatorPair pair = exp.LeftHandSide.Extract((ITerm)exp.LeftHandSide.TokenAt(0), (IOperator)exp.LeftHandSide.TokenAt(1));
+			OperatorExpressionPair pair = exp.LeftHandSide.Extract((IOperator)exp.LeftHandSide.TokenAt(1), (ITerm)exp.LeftHandSide.TokenAt(0));
 
 			Print(exp.ToString());
 			Print("Extracted: " + pair.ToString());
@@ -258,7 +258,7 @@ namespace RewriterTests
 			exp.RightHandSide.Insert(pair);
 			Print(exp.ToString());
 
-			exp.RightHandSide.CombineArithmeticTokens();
+			exp.RightHandSide.Simplify();
 			Print(exp.ToString());
 
 			Assert.AreEqual(expected, exp.ToString());

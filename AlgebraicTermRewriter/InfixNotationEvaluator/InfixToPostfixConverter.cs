@@ -46,9 +46,17 @@ namespace AlgebraicTermRewriter
 					throw new Exception($"Unexpected type '{(string.IsNullOrWhiteSpace(enumerableInfixTokens.LastOrDefault()) ? "" : enumerableInfixTokens.Last())}'.");
 				}
 
-				if (ParserTokens.Numbers.Contains(c) || (c == '-' && expectingType == ExpectingType.UnaryOrNumber))
+				if (ParserTokens.Numbers.Contains(c))
 				{
 					number += c.ToString();
+				}
+				else if (c == '-' && expectingType == ExpectingType.UnaryOrNumber)
+				{
+					number += c.ToString();
+				}
+				else if (c == '+' && expectingType == ExpectingType.UnaryOrNumber)
+				{
+					// Do nothing
 				}
 				else if (c == '(')
 				{

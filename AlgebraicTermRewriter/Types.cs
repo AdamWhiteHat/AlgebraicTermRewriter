@@ -17,7 +17,7 @@ namespace AlgebraicTermRewriter
 	public enum TermType
 	{
 		Number,
-		Variable	
+		Variable
 	}
 
 	public enum TokenType
@@ -26,10 +26,10 @@ namespace AlgebraicTermRewriter
 		Number,
 		Variable,
 		Operator,
-		Comparative
+		Comparison
 	}
 
-	public enum ComparativeType
+	public enum ComparisonType
 	{
 		Equals,
 		LessThan,
@@ -42,24 +42,24 @@ namespace AlgebraicTermRewriter
 	{
 		public static readonly string Equality = "=";
 		public static readonly string Inequality = "<>";
-		public static readonly string Comparative = Equality + Inequality;
+		public static readonly string Comparison = Equality + Inequality;
 		public static readonly string Parenthesis = "()";
 		public static readonly string Operators = "+-*/^";
 		public static readonly string Numbers = "0123456789";
 		public static readonly string Variables = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		public static readonly string All = Comparative + Parenthesis + Numbers + Operators + Variables;
+		public static readonly string All = Comparison + Parenthesis + Numbers + Operators + Variables;
 	}
 
 	public static class ConvertTo
 	{
-		public static ComparativeType ComparativeTypeEnum(string input)
+		public static ComparisonType ComparisonTypeEnum(string input)
 		{
-			if (input == "=") return ComparativeType.Equals;
-			else if (input == ">") return ComparativeType.GreaterThan;
-			else if (input == "<") return ComparativeType.LessThan;
-			else if (input == "<=") return ComparativeType.LessThanOrEquals;
-			else if (input == ">=") return ComparativeType.GreaterThanOrEquals;
-			else throw new ArgumentException($"{nameof(input)} is not a ComparativeType.");
+			if (input == "=") return ComparisonType.Equals;
+			else if (input == ">") return ComparisonType.GreaterThan;
+			else if (input == "<") return ComparisonType.LessThan;
+			else if (input == "<=") return ComparisonType.LessThanOrEquals;
+			else if (input == ">=") return ComparisonType.GreaterThanOrEquals;
+			else throw new ArgumentException($"{nameof(input)} is not a {typeof(ComparisonType)}.");
 		}
 
 		public static TokenType TokenTypeEnum(char symbol)
@@ -67,7 +67,7 @@ namespace AlgebraicTermRewriter
 			if (Types.Operators.Contains(symbol)) return TokenType.Operator;
 			else if (Types.Numbers.Contains(symbol)) return TokenType.Number;
 			else if (Types.Variables.Contains(symbol)) return TokenType.Variable;
-			else if (Types.Comparative.Contains(symbol)) return TokenType.Comparative;
+			else if (Types.Comparison.Contains(symbol)) return TokenType.Comparison;
 			else throw new ArgumentException($"{symbol} is not a TokenType.");
 		}
 	}

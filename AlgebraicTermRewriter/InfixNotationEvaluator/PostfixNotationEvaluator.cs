@@ -10,7 +10,10 @@ namespace AlgebraicTermRewriter
 		private static string AllowedCharacters = ParserTokens.Numbers + ParserTokens.Operators + " ";
 		public static int Evaluate(string postfixNotationString)
 		{
-			if (string.IsNullOrWhiteSpace(postfixNotationString)) throw new ArgumentException("Argument postfixNotationString must not be null, empty or whitespace.", "postfixNotationString");
+			if (string.IsNullOrWhiteSpace(postfixNotationString))
+			{
+				throw new ArgumentException("Argument postfixNotationString must not be null, empty or whitespace.", "postfixNotationString");
+			}
 
 			Stack<string> stack = new Stack<string>();
 			string sanitizedString = new string(postfixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
@@ -26,7 +29,10 @@ namespace AlgebraicTermRewriter
 						{
 							stack.Push(token);
 						}
-						else { throw new Exception("Operators and operands must be separated by a space."); }
+						else
+						{
+							throw new Exception("Operators and operands must be separated by a space.");
+						}
 					}
 					else
 					{
@@ -46,7 +52,10 @@ namespace AlgebraicTermRewriter
 									stack.Push(val);
 									continue;
 								}
-								else { throw new FormatException("The algebraic string has not sufficient values in the expression for the number of operators."); }
+								else
+								{
+									throw new FormatException("The algebraic string has not sufficient values in the expression for the number of operators.");
+								}
 							}
 
 							string r = stack.Pop();
@@ -58,7 +67,10 @@ namespace AlgebraicTermRewriter
 							bool parseSuccess = int.TryParse(r, out rhs);
 							parseSuccess &= int.TryParse(l, out lhs);
 
-							if (!parseSuccess) { throw new Exception("Unable to parse valueStack characters to Int32."); }
+							if (!parseSuccess)
+							{
+								throw new Exception("Unable to parse valueStack characters to Int32.");
+							}
 
 							int value = int.MinValue;
 							if (tokenChar == '+')
@@ -81,28 +93,46 @@ namespace AlgebraicTermRewriter
 							{
 								value = (int)Math.Pow(lhs, rhs);
 							}
-							else { throw new Exception(string.Format("Unrecognized token '{0}'.", tokenChar)); }
+							else
+							{
+								throw new Exception(string.Format("Unrecognized token '{0}'.", tokenChar));
+							}
 
 
 							if (value != int.MinValue)
 							{
 								stack.Push(value.ToString());
 							}
-							else { throw new Exception("Value never got set."); }
+							else
+							{
+								throw new Exception("Value never got set.");
+							}
 						}
-						else { throw new Exception(string.Format("Unrecognized character '{0}'.", tokenChar)); }
+						else
+						{
+							throw new Exception(string.Format("Unrecognized character '{0}'.", tokenChar));
+						}
 					}
 				}
-				else { throw new Exception("Token length is less than one."); }
+				else
+				{
+					throw new Exception("Token length is less than one.");
+				}
 			}
 
 			if (stack.Count == 1)
 			{
 				int result = 0;
-				if (!int.TryParse(stack.Pop(), out result)) { throw new Exception("Last value on stack could not be parsed into an integer."); }
+				if (!int.TryParse(stack.Pop(), out result))
+				{
+					throw new Exception("Last value on stack could not be parsed into an integer.");
+				}
 				return result;
 			}
-			else { throw new Exception("The input has too many values for the number of operators."); }
+			else
+			{
+				throw new Exception("The input has too many values for the number of operators.");
+			}
 
 		} // method
 	}

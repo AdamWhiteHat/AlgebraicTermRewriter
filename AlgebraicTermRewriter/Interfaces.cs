@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AlgebraicTermRewriter
 {
 	/// <summary>
 	/// A mathematical sentence is either an expression or an equation
-	/// (which consists of two expressions, separated by a comparative symbol, such as an equals).
+	/// (which consists of two expressions, separated by a comparison symbol, such as an equals).
 	/// Both the Expression class and the Equation class derive from ISentence,
 	/// because they are mathematical sentences.
 	/// </summary>

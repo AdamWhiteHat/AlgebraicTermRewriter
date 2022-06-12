@@ -19,7 +19,7 @@ namespace AlgebraicTermRewriter
 			source.RightHandSide.Substitute(variable, expression);
 		}
 
-		public static void ApplyToBothSides(this Equation source, TermOperatorPair pair)
+		public static void ApplyToBothSides(this Equation source, OperatorExpressionPair pair)
 		{
 			source.LeftHandSide.Insert(pair);
 			source.RightHandSide.Insert(pair);
@@ -40,6 +40,10 @@ namespace AlgebraicTermRewriter
 
 			if (leftHasVariables && rightHasVariables)
 			{
+				if (right.Variables.Count() > left.Variables.Count())
+				{
+					source.SwapLeftRight();
+				}
 				return;
 			}
 
@@ -50,10 +54,16 @@ namespace AlgebraicTermRewriter
 
 			if (rightHasVariables)
 			{
-				Expression temp = right;
-				source.RightHandSide = left;
-				source.LeftHandSide = temp;
+				source.SwapLeftRight();
+				return;
 			}
+		}
+
+		public static void SwapLeftRight(this Equation source)
+		{
+			Expression temp = source.RightHandSide;
+			source.RightHandSide = source.LeftHandSide;
+			source.LeftHandSide = temp;
 		}
 
 		public static Expression PickExpression(this Equation source)

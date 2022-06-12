@@ -10,7 +10,7 @@ namespace AlgebraicTermRewriter
 		{
 			if (string.IsNullOrWhiteSpace(input)) throw new ArgumentException();
 
-			if (input.Any(c => Types.Comparative.Contains(c)))
+			if (input.Any(c => Types.Comparison.Contains(c)))
 			{
 				return (ISentence)MathParser.ParseEquation(input);
 			}
@@ -27,26 +27,26 @@ namespace AlgebraicTermRewriter
 				throw new ArgumentException($"{nameof(input)} cannot be null, empty or white space.");
 			}
 
-			if (!input.Any(c => Types.Comparative.Contains(c)))
+			if (!input.Any(c => Types.Comparison.Contains(c)))
 			{
-				throw new ArgumentException("An Equation contains comparative symbols. You want an Expression.");
+				throw new ArgumentException("An Equation contains comparison symbols. You want an Expression.");
 			}
 
-			int index = input.IndexOfAny(Types.Comparative.ToArray());
+			int index = input.IndexOfAny(Types.Comparison.ToArray());
 
 			string leftExpression = input.Substring(0, index);
 
-			string comparative = input.ElementAt(index).ToString();
+			string comparison = input.ElementAt(index).ToString();
 
-			if (Types.Comparative.Contains(input.ElementAt(index + 1)))
+			if (Types.Comparison.Contains(input.ElementAt(index + 1)))
 			{
-				comparative += input.ElementAt(index + 1).ToString();
+				comparison += input.ElementAt(index + 1).ToString();
 				index += 1;
 			}
 
 			string rightExpression = input.Substring(index + 1);
 
-			ComparativeType compareType = ConvertTo.ComparativeTypeEnum(comparative);
+			ComparisonType compareType = ConvertTo.ComparisonTypeEnum(comparison);
 			Expression lhs = MathParser.ParseExpression(leftExpression);
 			Expression rhs = MathParser.ParseExpression(rightExpression);
 
@@ -61,9 +61,9 @@ namespace AlgebraicTermRewriter
 				throw new ArgumentException($"{nameof(input)} cannot be null, empty or white space.");
 			}
 
-			if (input.Any(c => Types.Comparative.Contains(c)))
+			if (input.Any(c => Types.Comparison.Contains(c)))
 			{
-				throw new ArgumentException("An expression contains no comparative symbols. You want an Equation.");
+				throw new ArgumentException("An expression contains no comparison symbols. You want an Equation.");
 			}
 
 			List<IToken> tokens = new List<IToken>();
@@ -75,13 +75,24 @@ namespace AlgebraicTermRewriter
 
 				char c = stack.Pop();
 
-				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))
+				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))				
 				{
 					string value = c.ToString();
 					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
 					{
 						c = stack.Pop();
 						value += c;
+					}
+
+					// Handle negation
+					if (tokens.Any())
+					{
+						int index = tokens.Count - 1;
+						if (tokens[index].Contents == "-")
+						{
+							tokens[index] = new Operator('+');
+							value = value.Insert(0, "-");
+						}
 					}
 
 					newToken = new Number(int.Parse(value));

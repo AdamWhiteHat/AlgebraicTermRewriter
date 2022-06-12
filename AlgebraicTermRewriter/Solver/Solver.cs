@@ -66,6 +66,7 @@ namespace AlgebraicTermRewriter
 			if (LeftHasVariables && RightHasVariables)
 			{
 				SolveForVariablesOnBothSide(eq);
+				Solutions.Add(eq.ToString());
 				return;
 			}
 
@@ -75,22 +76,21 @@ namespace AlgebraicTermRewriter
 			{
 				if (Left.Variables.Count() > 1)
 				{
-					SolveForMultipleVariables(Left);
+					SolveForMultipleVariables(eq);
 				}
-
-				if (!Left.IsVariableIsolated)
+				else if (!Left.IsVariableIsolated)
 				{
 					IsolateSingleVariable(eq);
 				}
 
 				if (!Left.IsVariableIsolated)
 				{
-					throw new Exception("Failed to isolate LeftHandSide.");
+					throw new Exception($"Failed to isolate LeftHandSide. Equation: '{eq.ToString()}'");
 				}
 
 				if (!Right.IsSimplified)
 				{
-					throw new Exception("Failed to simplify RightHandSide.");
+					throw new Exception($"Failed to simplify RightHandSide. Equation: '{eq.ToString()}'");
 				}
 
 				Solutions.Add(eq.ToString());
@@ -100,7 +100,7 @@ namespace AlgebraicTermRewriter
 
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
-		
+
 		/// <summary>
 		/// Finds all numbers and their associated operations.
 		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
@@ -115,7 +115,7 @@ namespace AlgebraicTermRewriter
 			{
 				ITerm term = candidate;
 
-				int termIndex = from.Tokens.IndexOf(term);
+				int termIndex = from.IndexOf(term);
 
 				IToken op = null;
 
@@ -143,21 +143,49 @@ namespace AlgebraicTermRewriter
 				{
 					throw new Exception("Was expecting to find Operator.");
 				}
-								
+
 				results.Add(new Tuple<IOperator, ITerm>(operation, term));
 			}
 
-			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1)).ToList();
+			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1))
+							.ToList();
 		}
 
 		private static int GetOperatorSolveOrder(IOperator operation)
-		{			
+		{
 			int weight = ParserTokens.PrecedenceDictionary[operation.Symbol];
 
 			if (operation.Symbol == '/') weight += 1; // Prefer other operations first
 			if (operation.Symbol == '^') weight += 2; // One does not simply negate an exponent and move it to the other side...
 
 			return weight;
+		}
+
+		private static int GetTermSolveOrder(ITerm term, IOperator operation)
+		{
+			if (term.Type == TokenType.Variable)
+			{
+				if (operation.Symbol == '*' || operation.Symbol == '/')
+				{
+					return 0;
+				}
+				else
+				{
+					return 1;
+				}
+			}
+			else if (term.Type == TokenType.Number)
+			{
+				if (operation.Symbol == '*' || operation.Symbol == '/')
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			return 2;
 		}
 
 		private static void IsolateSingleVariable(Equation eq)
@@ -177,42 +205,90 @@ namespace AlgebraicTermRewriter
 					break;
 				}
 
-				List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
-				if (!OperatorTermIndexList.Any())
+				bool moveVariableMultiple = false;
+				if ((from.Variables.Any() && to.Variables.Any()) /*|| eq.GetDistinctVariableCount() > 1*/)
 				{
-					break;
+					if (
+						!(from.Contains("-") || from.Contains("+"))
+						&&
+						from.Contains("*")
+						&&
+						from.Numbers.Any()
+						&&
+						to.Contains("*")
+						&&
+						to.Numbers.Any()
+						)
+					{
+						moveVariableMultiple = true;
+					}
 				}
 
-				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
+				if (moveVariableMultiple)
+				{
+					from = eq.RightHandSide;
+					to = eq.LeftHandSide;
+					MoveVariableTerm(from, to);
+				}
+				else
+				{
+					MoveNumberTerm(from, to);
+				}
 
-				TermOperatorPair extracted = from.Extract(next.Item2, next.Item1);
-				to.Insert(extracted);
-				
-
-				to.CombineArithmeticTokens();
-				from.CombineArithmeticTokens();
+				to.Simplify();
+				from.Simplify();
 
 				IToken leadingToken = from.Tokens.First();
 				if (leadingToken.Contents == "-")
 				{
-					to.SetToMultiplicativeInverse2();
-					from.SetToMultiplicativeInverse2();
+					to.SetToMultiplicativeInverse();
+					from.SetToMultiplicativeInverse();
 				}
 
 				eq.EnsureVariableOnLeft();
 			}
-
-
 		}
 
-		private void SolveForMultipleVariables(Expression ex)
+		private static void MoveVariableTerm(Expression from, Expression to)
 		{
-			throw new NotImplementedException();
+			IVariable variable = from.Variables.First();
+
+			SubExpression variableGroup = from.GetVariableProductSubExpression(variable);
+			OperatorExpressionPair extracted = from.Extract(new Operator('+'), variableGroup);
+
+			if (extracted != null)
+			{
+				to.Insert(extracted);
+			}
+		}
+
+		private static void MoveNumberTerm(Expression from, Expression to)
+		{
+			List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
+			if (OperatorTermIndexList.Any())
+			{
+				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
+
+				OperatorExpressionPair extracted = from.Extract(next.Item1, next.Item2);
+				to.Insert(extracted);
+			}
+		}
+
+		private void SolveForMultipleVariables(Equation eq)
+		{
+			//int leftVarsCount = Left.Variables.Count();
+			//int rightVarsCount = Right.Variables.Count();
+
+			//IVariable firstVar = Left.Variables.First();
+
+			IsolateSingleVariable(eq);
 		}
 
 		private void SolveForVariablesOnBothSide(Equation eq)
 		{
-			throw new NotImplementedException();
+			//IVariable firstVar = Left.Variables.First();
+
+			IsolateSingleVariable(eq);
 		}
 
 		private void AddSolvedVariable(IVariable variable, INumber numericValue)
@@ -222,25 +298,25 @@ namespace AlgebraicTermRewriter
 
 		private bool IsArithmeticEquasionTrue(Equation eq)
 		{
-			eq.LeftHandSide.CombineArithmeticTokens();
-			eq.RightHandSide.CombineArithmeticTokens();
+			eq.LeftHandSide.Simplify();
+			eq.RightHandSide.Simplify();
 
 			var left = eq.LeftHandSide;
 			var right = eq.RightHandSide;
 
 			if (!left.IsSimplified || !right.IsSimplified) throw new Exception("Expected both sides of the equation were arithmetic tokens only, but failed to simplify one or both sides.");
 
-			switch (eq.ComparativeOperator)
+			switch (eq.ComparisonOperator)
 			{
-				case ComparativeType.Equals:
+				case ComparisonType.Equals:
 					return left.Value == right.Value;
-				case ComparativeType.GreaterThan:
+				case ComparisonType.GreaterThan:
 					return left.Value > right.Value;
-				case ComparativeType.LessThan:
+				case ComparisonType.LessThan:
 					return left.Value < right.Value;
-				case ComparativeType.GreaterThanOrEquals:
+				case ComparisonType.GreaterThanOrEquals:
 					return left.Value >= right.Value;
-				case ComparativeType.LessThanOrEquals:
+				case ComparisonType.LessThanOrEquals:
 					return left.Value <= right.Value;
 				default:
 					throw new Exception();
@@ -255,7 +331,7 @@ namespace AlgebraicTermRewriter
 		{
 			if (ex.OnlyArithmeticTokens())
 			{
-				ex.CombineArithmeticTokens();
+				ex.Simplify();
 				if (!ex.IsSimplified) throw new Exception("Expected the expression was arithmetic tokens only, but failed to simplify.");
 				Solutions.Add(ex.ToString());
 				PrintStatus();

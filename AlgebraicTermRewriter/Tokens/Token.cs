@@ -12,9 +12,14 @@ namespace AlgebraicTermRewriter
 
 		public string Contents { get; private set; }
 		public TokenType Type { get; private set; }
-				
+
 		private Token()
 		{
+		}
+
+		public override string ToString()
+		{
+			return Contents;
 		}
 	}
 }

@@ -11,15 +11,15 @@ namespace AlgebraicTermRewriter
 	/// </summary>
 	public class Equation : ISentence, ICloneable<Equation>
 	{
-		public static Equation Empty = new Equation(Expression.Empty, ComparativeType.Equals, Expression.Empty);
+		public static Equation Empty = new Equation(Expression.Empty, ComparisonType.Equals, Expression.Empty);
 		public Expression LeftHandSide { get; set; } = null;
-		public ComparativeType ComparativeOperator { get; private set; }
+		public ComparisonType ComparisonOperator { get; private set; }
 		public Expression RightHandSide { get; set; } = null;
 
-		public Equation(Expression leftExpression, ComparativeType comparative, Expression rightExpression)
+		public Equation(Expression leftExpression, ComparisonType comparison, Expression rightExpression)
 		{
 			LeftHandSide = leftExpression;
-			ComparativeOperator = comparative;
+			ComparisonOperator = comparison;
 			RightHandSide = rightExpression;
 		}
 
@@ -28,12 +28,12 @@ namespace AlgebraicTermRewriter
 			Expression lhs = LeftHandSide.Clone();
 			Expression rhs = RightHandSide.Clone();
 
-			return new Equation(lhs, ComparativeOperator, rhs);
+			return new Equation(lhs, ComparisonOperator, rhs);
 		}
 
 		public override string ToString()
 		{
-			return string.Join(" ", new string[] { LeftHandSide.ToString(), ComparativeOperator.AsString(), RightHandSide.ToString() });
+			return string.Join(" ", new string[] { LeftHandSide.ToString(), ComparisonOperator.AsString(), RightHandSide.ToString() });
 		}
 	}
 }

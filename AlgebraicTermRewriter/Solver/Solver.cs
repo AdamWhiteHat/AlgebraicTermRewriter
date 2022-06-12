@@ -306,17 +306,17 @@ namespace AlgebraicTermRewriter
 
 			if (!left.IsSimplified || !right.IsSimplified) throw new Exception("Expected both sides of the equation were arithmetic tokens only, but failed to simplify one or both sides.");
 
-			switch (eq.ComparativeOperator)
+			switch (eq.ComparisonOperator)
 			{
-				case ComparativeType.Equals:
+				case ComparisonType.Equals:
 					return left.Value == right.Value;
-				case ComparativeType.GreaterThan:
+				case ComparisonType.GreaterThan:
 					return left.Value > right.Value;
-				case ComparativeType.LessThan:
+				case ComparisonType.LessThan:
 					return left.Value < right.Value;
-				case ComparativeType.GreaterThanOrEquals:
+				case ComparisonType.GreaterThanOrEquals:
 					return left.Value >= right.Value;
-				case ComparativeType.LessThanOrEquals:
+				case ComparisonType.LessThanOrEquals:
 					return left.Value <= right.Value;
 				default:
 					throw new Exception();

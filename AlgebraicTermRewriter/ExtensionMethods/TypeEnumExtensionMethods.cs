@@ -8,19 +8,19 @@ namespace AlgebraicTermRewriter
 {
 	public static class TypeEnumExtensionMethods
 	{
-		public static string AsString(this ComparativeType source)
+		public static string AsString(this ComparisonType source)
 		{
 			switch (source)
 			{
-				case ComparativeType.Equals:
+				case ComparisonType.Equals:
 					return "=";
-				case ComparativeType.GreaterThan:
+				case ComparisonType.GreaterThan:
 					return ">"; ;
-				case ComparativeType.LessThan:
+				case ComparisonType.LessThan:
 					return "<";
-				case ComparativeType.GreaterThanOrEquals:
+				case ComparisonType.GreaterThanOrEquals:
 					return ">=";
-				case ComparativeType.LessThanOrEquals:
+				case ComparisonType.LessThanOrEquals:
 					return "<=";
 				default:
 					throw new NotImplementedException();

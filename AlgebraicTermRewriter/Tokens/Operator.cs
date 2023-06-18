@@ -8,7 +8,7 @@ namespace AlgebraicTermRewriter
 {
 	public class Operator : IOperator
 	{
-		public char Symbol { get; private set; }
+		public char Symbol { get; }
 		public string Contents { get { return Symbol.ToString(); } }
 		public TokenType Type { get { return TokenType.Operator; } }
 
@@ -66,6 +66,11 @@ namespace AlgebraicTermRewriter
 				default:
 					throw new ArgumentException();
 			}
+		}
+
+		public IToken Clone()
+		{
+			return new Operator(this.Symbol);
 		}
 
 		public override string ToString()

@@ -13,7 +13,7 @@ namespace AlgebraicTermRewriter
 			int startIndex = -1;
 
 			int currentIndex = -1;
-			
+
 			bool isSequence = false;
 			int sequenceCount = 0;
 
@@ -29,7 +29,7 @@ namespace AlgebraicTermRewriter
 						if (startIndex == -1)
 						{
 							startIndex = currentIndex;
-							
+
 							sequenceCount = 1;
 							continue;
 						}
@@ -42,9 +42,9 @@ namespace AlgebraicTermRewriter
 				}
 				else if (e.Type == TokenType.Operator)
 				{
-					if(currentIndex == 0)
+					if (currentIndex == 0)
 					{
-						if(e.Contents == "-" || e.Contents == "+")
+						if (e.Contents == "-" || e.Contents == "+")
 						{
 							startIndex = currentIndex;
 						}
@@ -61,7 +61,7 @@ namespace AlgebraicTermRewriter
 					startIndex = -1;
 					sequenceCount = 0;
 					isSequence = false;
-				}				
+				}
 			}
 
 			if (isSequence == true)
@@ -159,4 +159,26 @@ namespace AlgebraicTermRewriter
 		}
 	}
 
+	public static class OperatorExtensionMethods
+	{
+		public static int RankOperator(this IOperator source)
+		{
+			if (source.Symbol == '+' || source.Symbol == '-')
+			{
+				return 0;
+			}
+			else if (source.Symbol == '*' || source.Symbol == '/')
+			{
+				return 1;
+			}
+			else if (source.Symbol == '^')
+			{
+				return 3;
+			}
+			else
+			{
+				throw new Exception($"Did you add a new {typeof(Operator)}?");
+			}
+		}
+	}
 }

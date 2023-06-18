@@ -66,18 +66,19 @@ namespace AlgebraicTermRewriter
 				return Token.None;
 			}
 
-			return Tokens.ElementAt(index);
+			return Tokens.ElementAt(index).Clone();
 		}
 
 		internal void AddToken(IToken newToken)
 		{
+			IToken clone = newToken.Clone();
 			if (SubExpressions.Count == 1)
 			{
-				SubExpressions[0].Add(newToken);
+				SubExpressions[0].Add(clone);
 			}
 			else
 			{
-				SubExpressions.Add(new SubExpression() { newToken });
+				SubExpressions.Add(new SubExpression() { clone });
 			}
 		}
 
@@ -145,15 +146,17 @@ namespace AlgebraicTermRewriter
 		{
 			if (pair == null) throw new ArgumentNullException();
 
-			if (pair.Orientation == InsertOrientation.Left)
+			OperatorExpressionPair clone = pair;
+
+			if (clone.Orientation == InsertOrientation.Left)
 			{
-				Insert(0, pair.Operator);
-				InsertRange(0, pair.Expr);
+				Insert(0, clone.Operator);
+				InsertRange(0, clone.Expr);
 			}
 			else
 			{
-				Add(pair.Operator);
-				AddRange(pair.Expr);
+				Add(clone.Operator);
+				AddRange(clone.Expr);
 			}
 		}
 
@@ -169,9 +172,11 @@ namespace AlgebraicTermRewriter
 
 		public void Insert(int index, IToken item)
 		{
+			IToken clone = item.Clone();
+
 			if (SubExpressions.Count == 1)
 			{
-				SubExpressions[0].Insert(index, item);
+				SubExpressions[0].Insert(index, clone);
 			}
 			else
 			{
@@ -180,11 +185,10 @@ namespace AlgebraicTermRewriter
 				SubExpression found = result.Item1;
 				if (found != null)
 				{
-					found.Insert(subIndex, item);
+					found.Insert(subIndex, clone);
 				}
 			}
 		}
-
 		public void InsertRange(int index, SubExpression collection)
 		{
 			if (SubExpressions.Count == 1)
@@ -206,9 +210,68 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
+		/// <summary>
+		/// Finds all numbers and their associated operations.
+		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
+		/// Returns a list of such tuples, ordered by precedence in ascending order.
+		/// </summary>
+		/// <returns>A list of tuples of the form: (precedence, index), ordered by precedence in ascending order.</returns>
+		public List<Tuple<IOperator, ITerm>> GetOperatorTermIndexPairs()
+		{
+			var results = new List<Tuple<IOperator, ITerm>>();
+
+			foreach (INumber candidate in this.Numbers)
+			{
+				ITerm term = candidate;
+
+				int termIndex = this.IndexOf(term);
+
+				IToken op = null;
+
+				if (termIndex == 0)
+				{
+					op = this.RightOfToken(term);
+
+					if (op.Contents == "/")
+					{
+						IToken alternative = this.RightOfToken(op);
+						term = (ITerm)alternative;
+					}
+					else if (op.Contents == "+" || op.Contents == "-")
+					{
+						op = new Operator('+');
+					}
+				}
+				else
+				{
+					op = this.LeftOfToken(term);
+				}
+
+				IOperator operation = op as IOperator;
+				if (operation == null)
+				{
+					throw new Exception("Was expecting to find Operator.");
+				}
+
+				results.Add(new Tuple<IOperator, ITerm>((IOperator)operation.Clone(), (ITerm)term.Clone()));
+			}
+
+			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1)).ToList();
+		}
+
+		private static int GetOperatorSolveOrder(IOperator operation)
+		{
+			int weight = ParserTokens.PrecedenceDictionary[operation.Symbol];
+
+			if (operation.Symbol == '/') weight += 1; // Prefer other operations first
+			if (operation.Symbol == '^') weight += 2; // One does not simply negate an exponent and move it to the other side...
+
+			return weight;
+		}
+
 		public Expression Clone()
 		{
-			return new Expression(this.Tokens.ToArray());
+			return new Expression(this.Tokens.Select(tok => tok.Clone()).ToArray());
 		}
 
 		public override string ToString()

@@ -8,34 +8,33 @@ namespace AlgebraicTermRewriter
 {
 	public static class ExpressionExtensionMethods_Checks
 	{
-		public static void Simplify(this Expression source)
+		public static Expression Simplify(this Expression source)
 		{
+			Expression result = source.Clone();
 			// Same variable appears more than once.
-			if (source.Variables.Count() != source.Variables.Distinct().Count())
+			if (result.Variables.Count() != result.Variables.Distinct().Count())
 			{
-				var variables = source.Variables.ToList();
+				var variables = result.Variables.ToList();
 
 				List<SubExpression> toCombine = new List<SubExpression>();
 				foreach (IVariable variable in variables)
 				{
-					toCombine.Add(source.GetVariableProductSubExpression(variable));
+					toCombine.Add(result.GetVariableProductSubExpression(variable));
 				}
 
-				string debugSource = source.ToString();
+				string debugSource = result.ToString();
 
-				int leftIndex = source.IndexOf(toCombine[0].Last());
-				int rightIndex = source.IndexOf(toCombine[1].First());
+				int leftIndex = result.IndexOf(toCombine[0].Last());
+				int rightIndex = result.IndexOf(toCombine[1].First());
 
-				var rightOfLeftToken = source.RightOfToken(source.TokenAt(leftIndex));
-				var leftOfRightToken = source.LeftOfToken(source.TokenAt(rightIndex));
+				var rightOfLeftToken = result.RightOfToken(result.TokenAt(leftIndex));
+				var leftOfRightToken = result.LeftOfToken(result.TokenAt(rightIndex));
 
-				if(rightOfLeftToken == leftOfRightToken)
+				if (rightOfLeftToken == leftOfRightToken)
 				{
-					if(rightOfLeftToken.Type == TokenType.Operator)
+					if (rightOfLeftToken.Type == TokenType.Operator)
 					{
 						IOperator operationToken = (IOperator)rightOfLeftToken;
-
-
 
 						if (operationToken.Symbol == '+')
 						{
@@ -58,42 +57,43 @@ namespace AlgebraicTermRewriter
 
 			}
 
-			Tuple<int, int> range = source.Tokens.GetLongestArithmeticRange();
+			Tuple<int, int> range = result.Tokens.GetLongestArithmeticRange();
 
 			if (range == null)
 			{
-				return;
+				return result;
 			}
 
-			List<IToken> arithmeticExpression = source.Tokens.ToList().GetRange(range.Item1, range.Item2);
+			List<IToken> arithmeticExpression = result.Tokens.ToList().GetRange(range.Item1, range.Item2);
 
 			string toEvaluate = string.Join("", arithmeticExpression.Select(e => e.Contents));
 
 			INumber newValue = new Number(InfixNotationEvaluator.Evaluate(toEvaluate));
-			source.RemoveRange(range.Item1, range.Item2);
+			result.RemoveRange(range.Item1, range.Item2);
 
 			int insertIndex = range.Item1 == 0 ? 0 : range.Item1;
 
 			if (newValue.Value == 0)
 			{
-				if (source.TokenCount == 0)
+				if (result.TokenCount == 0)
 				{
-					source.Insert(0, new Number(0));
-					return;
+					result.Insert(0, new Number(0));
+					return result;
 				}
-				IToken op = source.TokenAt(insertIndex);
+				IToken op = result.TokenAt(insertIndex);
 				if (op.Contents != "*")
 				{
-					source.RemoveAt(insertIndex);
+					result.RemoveAt(insertIndex);
 				}
 			}
 			else
 			{
-				source.Insert(insertIndex, newValue);
+				result.Insert(insertIndex, newValue);
 			}
+			return result;
 		}
 
-		public static void Substitute(this Expression source, IVariable variable, IToken[] expression)
+		public static Expression Substitute(this Expression source, IVariable variable, IToken[] expression)
 		{
 			if (source.Tokens.Any(e => e.Contents == variable.Contents))
 			{
@@ -106,10 +106,11 @@ namespace AlgebraicTermRewriter
 					if (currentToken.Contents == variable.Contents)
 					{
 						source.RemoveAt(index);
-						source.InsertRange(index, new SubExpression(expression));
+						source.InsertRange(index, new SubExpression(expression.ToArray()));
 					}
 				}
 			}
+			return source;
 		}
 
 		public static bool OnlyArithmeticTokens(this Expression source)
@@ -148,12 +149,22 @@ namespace AlgebraicTermRewriter
 			}
 			return 5;
 		}
+
+		public static int RankIsolationComplexity(this Expression source)
+		{
+			int score = source.Terms.Count();
+			score += source.Variables.Count();
+			score += source.Operators.Select(o => ParserTokens.PrecedenceDictionary[o.Symbol]).Sum();
+			score += source.Operators.Count(o => o.Symbol == '^') * 2;
+			return score;
+		}
+
 		public static SubExpression GetVariableProductSubExpression(this Expression source, IVariable variable)
 		{
 			List<IToken> collection = new List<IToken>();
-			collection.Add(variable);
+			collection.Add(variable.Clone());
 
-			IToken current = variable;
+			IToken current = variable.Clone();
 			IToken left = Token.None;
 			while (true)
 			{
@@ -167,11 +178,11 @@ namespace AlgebraicTermRewriter
 				collection.Insert(0, current);
 			}
 
-			current = variable;
+			current = variable.Clone();
 			IToken right = Token.None;
 			while (true)
 			{
-				right = source.RightOfToken(variable);
+				right = source.RightOfToken(current);
 				current = source.RightOfToken(right);
 				if (current.Equals(Token.None) || right.Contents != "*")
 				{
@@ -216,7 +227,7 @@ namespace AlgebraicTermRewriter
 				{
 					source.Remove(op);
 				}
-				orientation = InsertOrientation.Right;
+				orientation = InsertOrientation.Left;
 
 			}
 			else

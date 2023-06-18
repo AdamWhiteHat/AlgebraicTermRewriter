@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AlgebraicTermRewriter
 {
-	public class SubExpression : List<IToken>
+	public class SubExpression : List<IToken>, ICloneable<SubExpression>
 	{
 		public SubExpression()
 			: base()
@@ -13,6 +13,11 @@ namespace AlgebraicTermRewriter
 		public SubExpression(IToken[] tokens)
 			: base(tokens)
 		{ }
+
+		public SubExpression Clone()
+		{
+			return new SubExpression(this.Select(tok => tok.Clone()).ToArray());
+		}
 
 		public override string ToString()
 		{

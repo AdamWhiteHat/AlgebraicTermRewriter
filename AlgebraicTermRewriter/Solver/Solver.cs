@@ -26,6 +26,7 @@ namespace AlgebraicTermRewriter
 
 		private bool LeftHasVariables { get { return Left.Variables.Any(); } }
 		private bool RightHasVariables { get { return Right.Variables.Any(); } }
+
 		public Solver(Problem problem)
 			: this(problem, null)
 		{
@@ -101,92 +102,7 @@ namespace AlgebraicTermRewriter
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
 
-		/// <summary>
-		/// Finds all numbers and their associated operations.
-		/// For each number it creates a tuple with the operator's precedence and the number's index, in that order.
-		/// Returns a list of such tuples, ordered by precedence in ascending order.
-		/// </summary>
-		/// <returns>A list of tuples of the form: (precedence, index), ordered by precedence in ascending order.</returns>
-		private static List<Tuple<IOperator, ITerm>> GetOperatorTermIndexPairs(Expression from)
-		{
-			var results = new List<Tuple<IOperator, ITerm>>();
 
-			foreach (INumber candidate in from.Numbers)
-			{
-				ITerm term = candidate;
-
-				int termIndex = from.IndexOf(term);
-
-				IToken op = null;
-
-				if (termIndex == 0)
-				{
-					op = from.RightOfToken(term);
-
-					if (op.Contents == "/")
-					{
-						IToken alternative = from.RightOfToken(op);
-						term = (ITerm)alternative;
-					}
-					else if (op.Contents == "+" || op.Contents == "-")
-					{
-						op = new Operator('+');
-					}
-				}
-				else
-				{
-					op = from.LeftOfToken(term);
-				}
-
-				IOperator operation = op as IOperator;
-				if (operation == null)
-				{
-					throw new Exception("Was expecting to find Operator.");
-				}
-
-				results.Add(new Tuple<IOperator, ITerm>(operation, term));
-			}
-
-			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1))
-							.ToList();
-		}
-
-		private static int GetOperatorSolveOrder(IOperator operation)
-		{
-			int weight = ParserTokens.PrecedenceDictionary[operation.Symbol];
-
-			if (operation.Symbol == '/') weight += 1; // Prefer other operations first
-			if (operation.Symbol == '^') weight += 2; // One does not simply negate an exponent and move it to the other side...
-
-			return weight;
-		}
-
-		private static int GetTermSolveOrder(ITerm term, IOperator operation)
-		{
-			if (term.Type == TokenType.Variable)
-			{
-				if (operation.Symbol == '*' || operation.Symbol == '/')
-				{
-					return 0;
-				}
-				else
-				{
-					return 1;
-				}
-			}
-			else if (term.Type == TokenType.Number)
-			{
-				if (operation.Symbol == '*' || operation.Symbol == '/')
-				{
-					return 1;
-				}
-				else
-				{
-					return 0;
-				}
-			}
-			return 2;
-		}
 
 		private static void IsolateSingleVariable(Equation eq)
 		{
@@ -228,7 +144,8 @@ namespace AlgebraicTermRewriter
 				{
 					from = eq.RightHandSide;
 					to = eq.LeftHandSide;
-					MoveVariableTerm(from, to);
+					IVariable variable = from.Variables.First();
+					MoveVariableTerm(variable, from, to);
 				}
 				else
 				{
@@ -249,29 +166,34 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
-		private static void MoveVariableTerm(Expression from, Expression to)
+		public static bool MoveVariableTerm(IVariable variable, Expression from, Expression to)
 		{
-			IVariable variable = from.Variables.First();
-
 			SubExpression variableGroup = from.GetVariableProductSubExpression(variable);
 			OperatorExpressionPair extracted = from.Extract(new Operator('+'), variableGroup);
 
 			if (extracted != null)
 			{
 				to.Insert(extracted);
+				return true;
 			}
+			return false;
 		}
 
-		private static void MoveNumberTerm(Expression from, Expression to)
+		public static bool MoveNumberTerm(Expression from, Expression to)
 		{
-			List<Tuple<IOperator, ITerm>> OperatorTermIndexList = GetOperatorTermIndexPairs(from);
+			List<Tuple<IOperator, ITerm>> OperatorTermIndexList = from.GetOperatorTermIndexPairs();
 			if (OperatorTermIndexList.Any())
 			{
 				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
 
 				OperatorExpressionPair extracted = from.Extract(next.Item1, next.Item2);
-				to.Insert(extracted);
+				if (extracted != null)
+				{
+					to.Insert(extracted);
+					return true;
+				}
 			}
+			return false;
 		}
 
 		private void SolveForMultipleVariables(Equation eq)
@@ -293,7 +215,7 @@ namespace AlgebraicTermRewriter
 
 		private void AddSolvedVariable(IVariable variable, INumber numericValue)
 		{
-			SolvedVariables.Add(variable.Value, numericValue.Value);
+			SolvedVariables.Add(variable.Symbol, numericValue.Value);
 		}
 
 		private bool IsArithmeticEquasionTrue(Equation eq)

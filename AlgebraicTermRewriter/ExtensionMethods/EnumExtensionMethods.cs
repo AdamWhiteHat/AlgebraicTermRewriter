@@ -33,4 +33,14 @@ namespace AlgebraicTermRewriter
 			else return TokenType.Variable;
 		}
 	}
+
+	public static class SideOfEquationExtensionMethods
+	{
+		public static SideOfEquation Other(this SideOfEquation side)
+		{
+			if (side == SideOfEquation.Left) { return SideOfEquation.Right; }
+			if (side == SideOfEquation.Right) { return SideOfEquation.Left; }
+			throw new Exception($"Did you add a new {typeof(SideOfEquation)} enum value?");
+		}
+	}
 }

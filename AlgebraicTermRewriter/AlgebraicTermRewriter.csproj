@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AlgebraicTermRewriter</RootNamespace>
     <AssemblyName>AlgebraicTermRewriter</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\_MyFramework\Dead Code Rules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -42,6 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sentence\SubExpression.cs" />
+    <Compile Include="Solver\IRewriteRule.cs" />
+    <Compile Include="Solver\RewriteRuleCollection.cs" />
+    <Compile Include="Solver\RewriteRules\IsolateSingleVariable.cs" />
+    <Compile Include="Solver\RewriteRules\SimplifyEquation.cs" />
     <Compile Include="Tokens\Token.cs" />
     <Compile Include="Tokens\OperatorExpressionPair.cs" />
     <Compile Include="Tokens\Number.cs" />
@@ -50,13 +56,13 @@
     <Compile Include="ExtensionMethods\TokenExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\EquationExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\IEnumerableExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\TypeEnumExtensionMethods.cs" />
+    <Compile Include="ExtensionMethods\EnumExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\ExpressionExtensionMethods.cs" />
     <Compile Include="InfixNotationEvaluator\InfixNotationEvaluator.cs" />
     <Compile Include="InfixNotationEvaluator\PostfixNotationEvaluator.cs" />
     <Compile Include="InfixNotationEvaluator\InfixToPostfixConverter.cs" />
     <Compile Include="InfixNotationEvaluator\ParserTokens.cs" />
-    <Compile Include="Interfaces.cs" />
+    <Compile Include="Tokens\Interfaces.cs" />
     <Compile Include="Parser\MathParser.cs" />
     <Compile Include="Sentence\Problem.cs" />
     <Compile Include="Sentence\Equation.cs" />

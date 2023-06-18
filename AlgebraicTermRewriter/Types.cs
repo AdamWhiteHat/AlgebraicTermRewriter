@@ -29,6 +29,16 @@ namespace AlgebraicTermRewriter
 		Comparison
 	}
 
+	public enum OperationType
+	{
+		Addition,
+		Subtraction,
+		Multiplication,
+		Divition,
+		Exponentiation,
+		Root
+	}
+
 	public enum ComparisonType
 	{
 		Equals,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static AlgebraicTermRewriter.IToken;
 
 namespace AlgebraicTermRewriter
 {
@@ -28,7 +29,7 @@ namespace AlgebraicTermRewriter
 	/// </summary>
 	public interface IVariable : ITerm
 	{
-		char Value { get; }
+		char Symbol { get; }
 	}
 
 	/// <summary>
@@ -51,7 +52,7 @@ namespace AlgebraicTermRewriter
 	/// The most basic token in a mathematical sentence.
 	/// Could also be thought of as a Token, from a parsing perspective.
 	/// </summary>
-	public interface IToken
+	public interface IToken : ICloneable<IToken>
 	{
 		string Contents { get; }
 		TokenType Type { get; }

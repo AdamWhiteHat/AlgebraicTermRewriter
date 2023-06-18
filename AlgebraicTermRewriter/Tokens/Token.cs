@@ -17,6 +17,11 @@ namespace AlgebraicTermRewriter
 		{
 		}
 
+		public IToken Clone()
+		{
+			return new Token() { Contents = this.Contents, Type = this.Type };
+		}
+
 		public override string ToString()
 		{
 			return Contents;

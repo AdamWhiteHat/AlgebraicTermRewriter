@@ -2,16 +2,16 @@
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using AlgebraicTermRewriter;
 
 namespace RewriterTests
 {
-	[TestClass]
+	[TestFixture]
 	public class SimpleEquations
 	{
 
-		[TestMethod]
+		[Test]
 		public void TestSolveBasicEquations()
 		{
 			string[] EquationA = new string[] { "x-5=10", "x = 15" };
@@ -61,11 +61,9 @@ namespace RewriterTests
 			TestSolveArithmeticHelper(Equation4);
 
 			Print("---------");
-
-
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestSolveStandardEquations()
 		{
 			string[] EquationA = new string[] { "2 * x + 4 = 10", "x = 3" };
@@ -73,7 +71,7 @@ namespace RewriterTests
 		}
 
 		/*	NOT IMPLEMENTED YET
-		[TestMethod]
+		[Test]
 		public void TestSolveRootsEquations()
 		{
 			string[] EquationB = new string[] { "2 * y ^ 2 - 2 = 48", "y = 5" };
@@ -81,7 +79,7 @@ namespace RewriterTests
 		}
 		*/
 
-		[TestMethod]
+		[Test]
 		public void TestSolveForVariablesOnBothSides001()
 		{
 			// Not Implemented yet
@@ -90,7 +88,7 @@ namespace RewriterTests
 			TestSolveArithmeticHelper(EquationA);
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestSolveForVariablesOnBothSides002()
 		{
 			// Not Implemented yet
@@ -99,7 +97,7 @@ namespace RewriterTests
 			TestSolveArithmeticHelper(EquationA);
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestSolveForMultipleVariables()
 		{
 			// Not Implemented yet
@@ -108,11 +106,10 @@ namespace RewriterTests
 			TestSolveArithmeticHelper(EquationA);
 		}
 
-
 		private void TestSolveArithmeticHelper(string[] equation)
 		{
 			Problem prob = new Problem(new string[] { equation[0] });
-			Print(prob.ToString());
+			Print(prob);
 
 			Solver solver = new Solver(prob, Print);
 			solver.Solve();
@@ -137,9 +134,7 @@ namespace RewriterTests
 			Assert.AreEqual(resultExpected, resultActual);
 		}
 
-
-
-		[TestMethod]
+		[Test]
 		public void TestCombineArithmeticTokens()
 		{
 			string equation0 = "x+5*2";
@@ -167,7 +162,7 @@ namespace RewriterTests
 			string expected7 = "50";
 
 			string equation8 = "y+4*x-9/z+2*y^2";
-			string expected8 = "y + 4 * x + -9 / z + 2 * y ^ 2";
+			string expected8 = "y + 4 * x - 9 / z + 2 * y ^ 2";
 
 			CombineArithmeticTokens(equation0, expected0);
 			CombineArithmeticTokens(equation1, expected1);
@@ -180,8 +175,7 @@ namespace RewriterTests
 			CombineArithmeticTokens(equation8, expected8);
 		}
 
-
-		[TestMethod]
+		[Test]
 		public void TestCombineArithmeticTokens_Negatives()
 		{
 			string equation1 = "3 * x - 8 + 6";
@@ -190,25 +184,26 @@ namespace RewriterTests
 			CombineArithmeticTokens(equation1, expected1);
 		}
 
-
 		public void CombineArithmeticTokens(string expressionString, string expected)
 		{
 			Expression exp = MathParser.ParseExpression(expressionString);
 
 			Print("-----");
 			Print();
-			Print($"Input: {exp.ToString()}");
+			Print($"Input: {exp}");
 			Print();
 
-			exp.Simplify();
-			Print($"Result: [{exp.ToString()}]           Expecting: ({expected})");
+
+			var result = SimplifyEquation.Simplify(exp);
+			Print($"Result: \"{result}\"           Expecting: \"{expected}\"");
 			Print();
 
-			Assert.AreEqual(expected, exp.ToString());
+			string actual = result.ToString();
+
+			Assert.AreEqual(expected, actual);
 		}
 
-
-		[TestMethod]
+		[Test]
 		public void TestUnaryOperators()
 		{
 			string equation1 = "-8*2+7";
@@ -217,59 +212,51 @@ namespace RewriterTests
 			CombineArithmeticTokens(equation1, expected1);
 		}
 
-
-		[TestMethod]
+		[Test]
 		public void TestExtractionInsertion_Addition()
 		{
 			string eEquation1 = "x+5=10";
 			string expected = "x = 5";
 
 			Equation exp = MathParser.ParseEquation(eEquation1);
-			Print(exp.ToString());
+			Print(exp);
 
 			OperatorExpressionPair pair = exp.LeftHandSide.Extract((IOperator)exp.LeftHandSide.TokenAt(1), (ITerm)exp.LeftHandSide.TokenAt(2));
-
-			Print(exp.ToString());
-			Print("Extracted: " + pair.ToString());
+			Print($"Extracted: {pair}");
 
 			exp.RightHandSide.Insert(pair);
-			Print(exp.ToString());
+			Print(exp);
 
-			exp.RightHandSide.Simplify();
-			Print(exp.ToString());
+			var result = SimplifyEquation.ApplyRule(exp);
 
-			Assert.AreEqual(expected, exp.ToString());
+			Print(result);
+
+			Assert.AreEqual(expected, result.ToString());
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestExtractionInsertion_Multiplication()
 		{
 			string eEquation1 = "2*x=8";
 			string expected = "x = 4";
 
 			Equation exp = MathParser.ParseEquation(eEquation1);
-			Print(exp.ToString());
+			Print(exp);
 
 			OperatorExpressionPair pair = exp.LeftHandSide.Extract((IOperator)exp.LeftHandSide.TokenAt(1), (ITerm)exp.LeftHandSide.TokenAt(0));
-
-			Print(exp.ToString());
-			Print("Extracted: " + pair.ToString());
+			Print($"Extracted: {pair}");
 
 			exp.RightHandSide.Insert(pair);
-			Print(exp.ToString());
+			Print(exp);
 
-			exp.RightHandSide.Simplify();
-			Print(exp.ToString());
+			var result = SimplifyEquation.ApplyRule(exp);
 
-			Assert.AreEqual(expected, exp.ToString());
+			Print(result);
+
+			Assert.AreEqual(expected, result.ToString());
 		}
 
-
-
-
-
-
-		[TestMethod]
+		[Test]
 		public void TestLongestSubsequenceOfArithmeticTokens()
 		{
 			string equation1 = "x+5";
@@ -288,7 +275,7 @@ namespace RewriterTests
 			Expression parsed = MathParser.ParseExpression(equation);
 			Print();
 			Print("----------------------------");
-			Print(parsed.ToString());
+			Print(parsed);
 			ReportSubsequence(parsed);
 		}
 
@@ -305,23 +292,14 @@ namespace RewriterTests
 		}
 
 
+		public void Print(object obj) { Print("{0}", obj); }
 
-
-
-
-
-
-		public void Print(string message = " ") { Print("{0}", message); }
-
+		public void Print(string message = " ") { TestContext.WriteLine(message); }
 
 		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }
 
 
 		private TestContext testContextInstance;
 		public TestContext TestContext { get { return testContextInstance; } set { testContextInstance = value; } }
-
-
-		[ClassInitializeAttribute]
-		public static void Initialize(TestContext context) { }
 	}
 }

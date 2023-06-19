@@ -36,11 +36,11 @@ namespace AlgebraicTermRewriter
 
 	public static class SideOfEquationExtensionMethods
 	{
-		public static SideOfEquation Other(this SideOfEquation side)
+		public static RelativeDirection Other(this RelativeDirection side)
 		{
-			if (side == SideOfEquation.Left) { return SideOfEquation.Right; }
-			if (side == SideOfEquation.Right) { return SideOfEquation.Left; }
-			throw new Exception($"Did you add a new {typeof(SideOfEquation)} enum value?");
+			if (side == RelativeDirection.Left) { return RelativeDirection.Right; }
+			if (side == RelativeDirection.Right) { return RelativeDirection.Left; }
+			throw new Exception($"Did you add a new {typeof(RelativeDirection)} enum value?");
 		}
 	}
 }

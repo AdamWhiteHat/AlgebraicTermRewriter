@@ -11,12 +11,6 @@ namespace AlgebraicTermRewriter
 		private Problem equations;
 		private Action<string> LoggingMethod;
 
-		private enum OperatorLocation
-		{
-			Left,
-			Right
-		}
-
 		public List<string> Solutions { get; private set; }
 		public Dictionary<char, int> SolvedVariables { get; private set; }
 
@@ -49,10 +43,10 @@ namespace AlgebraicTermRewriter
 				{
 					SolveEquation(sentence as Equation);
 				}
-				else if (sentence is Expression)
-				{
-					SolveExpression(sentence as Expression);
-				}
+				//else if (sentence is Expression)
+				//{
+				//	SolveExpression(sentence as Expression);
+				//}
 			}
 		}
 
@@ -71,29 +65,31 @@ namespace AlgebraicTermRewriter
 				return;
 			}
 
-			eq.EnsureVariableOnLeft();
-
-			if (LeftHasVariables)
+			int iterationLimit = 50;
+			bool result = true;
+			do
 			{
+				iterationLimit--;
+
+				eq.EnsureVariableOnLeft();
+				if (!LeftHasVariables)
+				{
+					return;
+				}
+
 				if (Left.Variables.Count() > 1)
 				{
-					SolveForMultipleVariables(eq);
+					result = SolveForMultipleVariables(eq);
 				}
 				else if (!Left.IsVariableIsolated)
 				{
-					IsolateSingleVariable(eq);
+					result = IsolateSingleVariable(eq);
 				}
+			}
+			while (result == true && iterationLimit > 0);
 
-				if (!Left.IsVariableIsolated)
-				{
-					throw new Exception($"Failed to isolate LeftHandSide. Equation: '{eq.ToString()}'");
-				}
-
-				if (!Right.IsSimplified)
-				{
-					throw new Exception($"Failed to simplify RightHandSide. Equation: '{eq.ToString()}'");
-				}
-
+			if (Left.IsVariableIsolated && Right.IsSimplified)
+			{
 				Solutions.Add(eq.ToString());
 				AddSolvedVariable(Left.Variables.Single(), Right.Numbers.Single());
 				return;
@@ -102,68 +98,69 @@ namespace AlgebraicTermRewriter
 			throw new Exception("Not sure what to do here. Equations should have been solved.");
 		}
 
-
-
-		private static void IsolateSingleVariable(Equation eq)
+		public static bool IsolateSingleVariable(Equation eq)
 		{
 			Expression from = null;
 			Expression to = null;
 
 			eq.EnsureVariableOnLeft();
 
-			while (true)
+			from = eq.LeftHandSide;
+			to = eq.RightHandSide;
+
+			if (!from.Numbers.Any())
 			{
-				from = eq.LeftHandSide;
-				to = eq.RightHandSide;
-
-				if (!from.Numbers.Any())
-				{
-					break;
-				}
-
-				bool moveVariableMultiple = false;
-				if ((from.Variables.Any() && to.Variables.Any()) /*|| eq.GetDistinctVariableCount() > 1*/)
-				{
-					if (
-						!(from.Contains("-") || from.Contains("+"))
-						&&
-						from.Contains("*")
-						&&
-						from.Numbers.Any()
-						&&
-						to.Contains("*")
-						&&
-						to.Numbers.Any()
-						)
-					{
-						moveVariableMultiple = true;
-					}
-				}
-
-				if (moveVariableMultiple)
-				{
-					from = eq.RightHandSide;
-					to = eq.LeftHandSide;
-					IVariable variable = from.Variables.First();
-					MoveVariableTerm(variable, from, to);
-				}
-				else
-				{
-					MoveNumberTerm(from, to);
-				}
-
-				to.Simplify();
-				from.Simplify();
-
-				IToken leadingToken = from.Tokens.First();
-				if (leadingToken.Contents == "-")
-				{
-					to.SetToMultiplicativeInverse();
-					from.SetToMultiplicativeInverse();
-				}
-
-				eq.EnsureVariableOnLeft();
+				return false;
 			}
+
+			bool moveVariableMultiple = false;
+			if ((from.Variables.Any() && to.Variables.Any()) /*|| eq.GetDistinctVariableCount() > 1*/)
+			{
+				if (
+					!(from.Contains("-") || from.Contains("+"))
+					&&
+					from.Contains("*")
+					&&
+					from.Numbers.Any()
+					&&
+					to.Contains("*")
+					&&
+					to.Numbers.Any()
+					)
+				{
+					moveVariableMultiple = true;
+				}
+			}
+
+			bool result = false;
+			if (moveVariableMultiple)
+			{
+				from = eq.RightHandSide;
+				to = eq.LeftHandSide;
+				IVariable variable = from.Variables.First();
+				result = MoveVariableTerm(variable, from, to);
+			}
+			else
+			{
+				result = MoveNumberTerm(from, to);
+			}
+
+			IToken leadingToken = from.Tokens.First();
+			if (leadingToken.Contents == "-")
+			{
+				to.SetToAdditiveInverse();
+				from.SetToAdditiveInverse();
+			}
+
+			if (result)
+			{
+				from = SimplifyEquation.Simplify(from);
+				to = SimplifyEquation.Simplify(to);
+			}
+
+			eq.EnsureVariableOnLeft();
+
+			return result;
 		}
 
 		public static bool MoveVariableTerm(IVariable variable, Expression from, Expression to)
@@ -181,10 +178,10 @@ namespace AlgebraicTermRewriter
 
 		public static bool MoveNumberTerm(Expression from, Expression to)
 		{
-			List<Tuple<IOperator, ITerm>> OperatorTermIndexList = from.GetOperatorTermIndexPairs();
+			List<Tuple<IOperator, INumber>> OperatorTermIndexList = from.GetOperatorTermIndexPairs();
 			if (OperatorTermIndexList.Any())
 			{
-				Tuple<IOperator, ITerm> next = OperatorTermIndexList.First();
+				Tuple<IOperator, INumber> next = OperatorTermIndexList.First();
 
 				OperatorExpressionPair extracted = from.Extract(next.Item1, next.Item2);
 				if (extracted != null)
@@ -196,21 +193,78 @@ namespace AlgebraicTermRewriter
 			return false;
 		}
 
-		private void SolveForMultipleVariables(Equation eq)
+		private bool SolveForMultipleVariables(Equation input)
 		{
 			//int leftVarsCount = Left.Variables.Count();
 			//int rightVarsCount = Right.Variables.Count();
 
 			//IVariable firstVar = Left.Variables.First();
 
-			IsolateSingleVariable(eq);
+			//	throw new NotImplementedException();
+
+			// Same variable appears more than once.
+			#region Same variable appears more than once.
+
+			/*
+
+			if (result.Variables.Count() != result.Variables.Distinct().Count())
+			{
+				var variables = result.Variables.ToList();
+
+				List<SubExpression> toCombine = new List<SubExpression>();
+				foreach (IVariable variable in variables)
+				{
+					toCombine.Add(result.GetVariableProductSubExpression(variable));
+				}
+
+				string debugSource = result.ToString();
+
+				int leftIndex = result.IndexOf(toCombine[0].Last());
+				int rightIndex = result.IndexOf(toCombine[1].First());
+
+				var rightOfLeftToken = result.RightOfToken(result.TokenAt(leftIndex));
+				var leftOfRightToken = result.LeftOfToken(result.TokenAt(rightIndex));
+
+				if (rightOfLeftToken == leftOfRightToken)
+				{
+					if (rightOfLeftToken.Type == TokenType.Operator)
+					{
+						IOperator operationToken = (IOperator)rightOfLeftToken;
+
+						if (operationToken.Symbol == '+')
+						{
+
+						}
+						else if (operationToken.Symbol == '-')
+						{
+
+						}
+						else if (operationToken.Symbol == '*')
+						{
+
+						}
+						else if (operationToken.Symbol == '/')
+						{
+
+						}
+					}
+				}
+			}
+
+			*/
+
+			#endregion
+
+			return IsolateSingleVariable(input);
 		}
 
-		private void SolveForVariablesOnBothSide(Equation eq)
+		private bool SolveForVariablesOnBothSide(Equation input)
 		{
 			//IVariable firstVar = Left.Variables.First();
 
-			IsolateSingleVariable(eq);
+			//throw new NotImplementedException();
+
+			return IsolateSingleVariable(input);
 		}
 
 		private void AddSolvedVariable(IVariable variable, INumber numericValue)
@@ -218,17 +272,14 @@ namespace AlgebraicTermRewriter
 			SolvedVariables.Add(variable.Symbol, numericValue.Value);
 		}
 
-		private bool IsArithmeticEquasionTrue(Equation eq)
+		private bool IsArithmeticEquasionTrue(Equation input)
 		{
-			eq.LeftHandSide.Simplify();
-			eq.RightHandSide.Simplify();
-
-			var left = eq.LeftHandSide;
-			var right = eq.RightHandSide;
+			var left = input.LeftHandSide;
+			var right = input.RightHandSide;
 
 			if (!left.IsSimplified || !right.IsSimplified) throw new Exception("Expected both sides of the equation were arithmetic tokens only, but failed to simplify one or both sides.");
 
-			switch (eq.ComparisonOperator)
+			switch (input.ComparisonOperator)
 			{
 				case ComparisonType.Equals:
 					return left.Value == right.Value;
@@ -249,15 +300,21 @@ namespace AlgebraicTermRewriter
 
 		/* EXPRESSIONS */
 
-		private void SolveExpression(Expression ex)
+		private bool SolveExpression(Expression input)
 		{
-			if (ex.OnlyArithmeticTokens())
-			{
-				ex.Simplify();
-				if (!ex.IsSimplified) throw new Exception("Expected the expression was arithmetic tokens only, but failed to simplify.");
-				Solutions.Add(ex.ToString());
-				PrintStatus();
-			}
+
+			throw new NotImplementedException();
+
+			// TODO: Rewrite using IRewriteRules
+
+
+			//if (ex.OnlyArithmeticTokens())
+			//{
+			//	ex.Simplify();
+			//	if (!ex.IsSimplified) throw new Exception("Expected the expression was arithmetic tokens only, but failed to simplify.");
+			//	Solutions.Add(ex.ToString());
+			//	PrintStatus();
+			//}
 		}
 
 		private void PrintStatus()

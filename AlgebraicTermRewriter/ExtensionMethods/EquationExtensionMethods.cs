@@ -66,14 +66,14 @@ namespace AlgebraicTermRewriter
 			source.LeftHandSide = temp;
 		}
 
-		public static Expression PickExpression(this Equation source)
+		public static RelativeDirection PickExpression(this Equation source)
 		{
 			Expression l = source.LeftHandSide;
 			Expression r = source.RightHandSide;
 			int lComplexity = l.RankComplexity();
 			int rComplexity = r.RankComplexity();
 
-			return (lComplexity < rComplexity) ? r : l;
+			return (lComplexity < rComplexity) ? RelativeDirection.Right : RelativeDirection.Left;
 		}
 	}
 }

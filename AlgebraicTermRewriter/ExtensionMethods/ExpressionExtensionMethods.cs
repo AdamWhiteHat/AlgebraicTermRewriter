@@ -8,91 +8,6 @@ namespace AlgebraicTermRewriter
 {
 	public static class ExpressionExtensionMethods_Checks
 	{
-		public static Expression Simplify(this Expression source)
-		{
-			Expression result = source.Clone();
-			// Same variable appears more than once.
-			if (result.Variables.Count() != result.Variables.Distinct().Count())
-			{
-				var variables = result.Variables.ToList();
-
-				List<SubExpression> toCombine = new List<SubExpression>();
-				foreach (IVariable variable in variables)
-				{
-					toCombine.Add(result.GetVariableProductSubExpression(variable));
-				}
-
-				string debugSource = result.ToString();
-
-				int leftIndex = result.IndexOf(toCombine[0].Last());
-				int rightIndex = result.IndexOf(toCombine[1].First());
-
-				var rightOfLeftToken = result.RightOfToken(result.TokenAt(leftIndex));
-				var leftOfRightToken = result.LeftOfToken(result.TokenAt(rightIndex));
-
-				if (rightOfLeftToken == leftOfRightToken)
-				{
-					if (rightOfLeftToken.Type == TokenType.Operator)
-					{
-						IOperator operationToken = (IOperator)rightOfLeftToken;
-
-						if (operationToken.Symbol == '+')
-						{
-
-						}
-						else if (operationToken.Symbol == '-')
-						{
-
-						}
-						else if (operationToken.Symbol == '*')
-						{
-
-						}
-						else if (operationToken.Symbol == '/')
-						{
-
-						}
-					}
-				}
-
-			}
-
-			Tuple<int, int> range = result.Tokens.GetLongestArithmeticRange();
-
-			if (range == null)
-			{
-				return result;
-			}
-
-			List<IToken> arithmeticExpression = result.Tokens.ToList().GetRange(range.Item1, range.Item2);
-
-			string toEvaluate = string.Join("", arithmeticExpression.Select(e => e.Contents));
-
-			INumber newValue = new Number(InfixNotationEvaluator.Evaluate(toEvaluate));
-			result.RemoveRange(range.Item1, range.Item2);
-
-			int insertIndex = range.Item1 == 0 ? 0 : range.Item1;
-
-			if (newValue.Value == 0)
-			{
-				if (result.TokenCount == 0)
-				{
-					result.Insert(0, new Number(0));
-					return result;
-				}
-				IToken op = result.TokenAt(insertIndex);
-				if (op.Contents != "*")
-				{
-					result.RemoveAt(insertIndex);
-				}
-			}
-			else
-			{
-				result.Insert(insertIndex, newValue);
-			}
-			return result;
-		}
-
 		public static Expression Substitute(this Expression source, IVariable variable, IToken[] expression)
 		{
 			if (source.Tokens.Any(e => e.Contents == variable.Contents))
@@ -216,26 +131,22 @@ namespace AlgebraicTermRewriter
 				return null;
 			}
 
-			IOperator oper = op;
+			IOperator oper = (IOperator)op.Clone();
 
 			int tIndex = source.IndexOf(terms[0]);
 
-			InsertOrientation orientation = InsertOrientation.Either;
-			if (tIndex == 0)
+			InsertOrientation orientation = InsertOrientation.Right;
+
+			if (op.Symbol == '^')
 			{
-				if (op.Symbol != '+')
+				int opIndex = source.IndexOf(op);
+				if (opIndex != tIndex - 1)
 				{
-					source.Remove(op);
+					throw new Exception("Term of the exponentiation operator ('^') must be immediately right of the operator.");
 				}
-				orientation = InsertOrientation.Left;
-
-			}
-			else
-			{
-				source.Remove(op);
-				orientation = InsertOrientation.Right;
 			}
 
+			source.Remove(op);
 			oper = Operator.GetInverse(oper);
 
 			foreach (IToken term in terms)
@@ -246,7 +157,7 @@ namespace AlgebraicTermRewriter
 			return new OperatorExpressionPair(oper, new SubExpression(terms), orientation);
 		}
 
-		public static void SetToMultiplicativeInverse(this Expression source)
+		public static void SetToAdditiveInverse(this Expression source)
 		{
 			string expression = source.ToString()?.Replace(" ", "") ?? "";
 
@@ -265,18 +176,17 @@ namespace AlgebraicTermRewriter
 			{
 				if (source.TokenCount > 0)
 				{
-					INumber num = source.Tokens.First() as INumber;
+					INumber num = source.Numbers.First();
 					if (num != null)
 					{
-						int newNum = -num.Value;
-						source.SubExpressions[0][0] = new Number(newNum);
+						num.Negate();
 						return;
 					}
 				}
 			}
 		}
 
-		public static void SetToMultiplicativeInverse_Old(this Expression source)
+		public static void SetToAdditiveInverse_Old(this Expression source)
 		{
 			bool isNegative = false;
 			IToken first = null;

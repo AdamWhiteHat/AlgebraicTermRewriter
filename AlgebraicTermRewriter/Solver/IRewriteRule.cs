@@ -14,7 +14,7 @@ namespace AlgebraicTermRewriter
 		/// A numerical value that controls what order Rewrite Rules get applied in.
 		/// Rewrite rules are ordered from smallest to largest.
 		/// </summary>
-		int ApplyOrder { get; }
+		static int ApplyOrder { get; }
 
 		/// <summary>
 		/// Called for every Equation to see if this rewrite rule should be ran against it.
@@ -22,13 +22,13 @@ namespace AlgebraicTermRewriter
 		/// </summary>
 		/// <param name="equation">The equation to text.</param>
 		/// <returns><c>true</c> if this rule should be applied to the equation supplied in the parameter, or <c>false</c> otherwise.</returns>
-		bool ShouldApplyRule(Equation equation);
+		static bool ShouldApplyRule(Equation equation) => throw new NotImplementedException();
 
 		/// <summary>
 		/// Applies the rewrite rule to a qualifying equation.
 		/// Place your rewrite logic here.
 		/// </summary>
 		/// <param name="equation">The equation.</param>
-		Equation ApplyRule(Equation equation);
+		static Equation ApplyRule(Equation equation) => throw new NotImplementedException();
 	}
 }

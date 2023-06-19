@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace AlgebraicTermRewriter
 {
-	public enum SideOfEquation
+	public enum RelativeDirection
 	{
 		Left,
 		Right

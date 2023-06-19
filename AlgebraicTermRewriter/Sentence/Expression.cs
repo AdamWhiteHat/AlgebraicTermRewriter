@@ -49,6 +49,23 @@ namespace AlgebraicTermRewriter
 			SubExpressions.Add(new SubExpression(tokens));
 		}
 
+		public static Expression Parse(string expressionText)
+		{
+			if (string.IsNullOrWhiteSpace(expressionText))
+			{
+				throw new ArgumentException($"{nameof(expressionText)} cannot be null, empty or whitespace.");
+			}
+
+			if (expressionText.Any(c => Types.Comparison.Contains(c)))
+			{
+				throw new Exception($"{nameof(expressionText)} contains an equality or comparison operator (=, >, <, >=, <=). Perhaps you meant to parse it as an {nameof(Equation)} instead?");
+			}
+			else
+			{
+				return MathParser.ParseExpression(expressionText);
+			}
+		}
+
 		public bool Contains(IToken token)
 		{
 			return Contains(token.Contents);
@@ -79,6 +96,20 @@ namespace AlgebraicTermRewriter
 			else
 			{
 				SubExpressions.Add(new SubExpression() { clone });
+			}
+		}
+
+		internal void ReplaceAt(int index, IToken replacementToken)
+		{
+			Tuple<SubExpression, int> result = GetSubExpressionAtIndex(index);
+			int subIndex = result.Item2;
+			SubExpression found = result.Item1;
+
+			if (found != null)
+			{
+				IToken clone = replacementToken.Clone();
+				found.RemoveAt(subIndex);
+				found.Insert(subIndex, clone);
 			}
 		}
 
@@ -128,6 +159,11 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
+		internal void RemoveRange(Range range)
+		{
+			RemoveRange(range.StartIndex, range.Count);
+		}
+
 		internal void RemoveRange(int start, int count)
 		{
 			int[] indices = Enumerable.Range(start, count).Reverse().ToArray();
@@ -139,7 +175,7 @@ namespace AlgebraicTermRewriter
 
 		internal int IndexOf(IToken token)
 		{
-			return Tokens.ToList().IndexOf(token);
+			return Tokens.ToList().FindIndex(t => t.Contents.Equals(token.Contents));
 		}
 
 		public void Insert(OperatorExpressionPair pair)
@@ -193,9 +229,6 @@ namespace AlgebraicTermRewriter
 		{
 			if (SubExpressions.Count == 1)
 			{
-				//List<IToken> newTokens = Tokens.ToList();
-				//newTokens.InsertRange(index, collection);
-				//SubExpressions = new List<SubExpression>() { new SubExpression(newTokens.ToArray()) };
 				SubExpressions[0].InsertRange(index, collection);
 			}
 			else
@@ -216,13 +249,13 @@ namespace AlgebraicTermRewriter
 		/// Returns a list of such tuples, ordered by precedence in ascending order.
 		/// </summary>
 		/// <returns>A list of tuples of the form: (precedence, index), ordered by precedence in ascending order.</returns>
-		public List<Tuple<IOperator, ITerm>> GetOperatorTermIndexPairs()
+		public List<Tuple<IOperator, INumber>> GetOperatorTermIndexPairs()
 		{
-			var results = new List<Tuple<IOperator, ITerm>>();
+			var results = new List<Tuple<IOperator, INumber>>();
 
 			foreach (INumber candidate in this.Numbers)
 			{
-				ITerm term = candidate;
+				INumber term = candidate;
 
 				int termIndex = this.IndexOf(term);
 
@@ -235,12 +268,13 @@ namespace AlgebraicTermRewriter
 					if (op.Contents == "/")
 					{
 						IToken alternative = this.RightOfToken(op);
-						term = (ITerm)alternative;
+						term = (INumber)alternative;
 					}
-					else if (op.Contents == "+" || op.Contents == "-")
-					{
-						op = new Operator('+');
-					}
+					//else if (op.Contents == "+" || op.Contents == "-")
+					//{
+					//	op = new Operator('+');
+					//	term.Negate();
+					//}
 				}
 				else
 				{
@@ -253,7 +287,7 @@ namespace AlgebraicTermRewriter
 					throw new Exception("Was expecting to find Operator.");
 				}
 
-				results.Add(new Tuple<IOperator, ITerm>((IOperator)operation.Clone(), (ITerm)term.Clone()));
+				results.Add(new Tuple<IOperator, INumber>((IOperator)operation.Clone(), (INumber)term.Clone()));
 			}
 
 			return results.OrderBy(tup => GetOperatorSolveOrder(tup.Item1)).ToList();

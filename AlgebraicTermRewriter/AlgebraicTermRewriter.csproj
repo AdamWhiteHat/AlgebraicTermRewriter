@@ -1,83 +1,45 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{372DAE8C-A479-4DB5-8ACD-BF98E372B857}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AlgebraicTermRewriter</RootNamespace>
-    <AssemblyName>AlgebraicTermRewriter</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\..\_MyFramework\Dead Code Rules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Sentence\SubExpression.cs" />
-    <Compile Include="Solver\IRewriteRule.cs" />
-    <Compile Include="Solver\RewriteRuleCollection.cs" />
-    <Compile Include="Solver\RewriteRules\IsolateSingleVariable.cs" />
-    <Compile Include="Solver\RewriteRules\SimplifyEquation.cs" />
-    <Compile Include="Tokens\Token.cs" />
-    <Compile Include="Tokens\OperatorExpressionPair.cs" />
-    <Compile Include="Tokens\Number.cs" />
-    <Compile Include="Tokens\Operator.cs" />
-    <Compile Include="Tokens\Variable.cs" />
-    <Compile Include="ExtensionMethods\TokenExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\EquationExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\IEnumerableExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\EnumExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\ExpressionExtensionMethods.cs" />
-    <Compile Include="InfixNotationEvaluator\InfixNotationEvaluator.cs" />
-    <Compile Include="InfixNotationEvaluator\PostfixNotationEvaluator.cs" />
-    <Compile Include="InfixNotationEvaluator\InfixToPostfixConverter.cs" />
-    <Compile Include="InfixNotationEvaluator\ParserTokens.cs" />
-    <Compile Include="Tokens\Interfaces.cs" />
-    <Compile Include="Parser\MathParser.cs" />
-    <Compile Include="Sentence\Problem.cs" />
-    <Compile Include="Sentence\Equation.cs" />
-    <Compile Include="Sentence\Expression.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Solver\Solver.cs" />
-    <Compile Include="Types.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<LangVersion>11.0</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Title>AlgebraicTermRewriter</Title>
+		<Product>AlgebraicTermRewriter</Product>
+		<AssemblyName>AlgebraicTermRewriter</AssemblyName>
+		<AssemblyTitle>AlgebraicTermRewriter</AssemblyTitle>
+		<PackageId>AlgebraicTermRewriter</PackageId>
+		<Description>A symbolic algebraic equation term rewriter solution.</Description>
+		<Authors>Adam White</Authors>
+		<Company>Adam White</Company>
+		<Copyright>Copyright © 2023 Adam White</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>math mathematics symbolic algebra algebraic equation expression formula term rewriter simplify cas solve solver solving parse evaluation automatic differentiation  derivative integration numerics numbers optimization calculator csharp</PackageTags>
+		<PackageProjectUrl>https://www.nuget.org/packages/AlgebraicTermRewriter/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/AdamWhiteHat/AlgebraicTermRewriter</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<Version>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</Version>
+		<AssemblyVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</AssemblyVersion>
+		<FileVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</FileVersion>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="RewriterTests\**" />
+		<EmbeddedResource Remove="RewriterTests\**" />
+		<None Remove="RewriterTests\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
 </Project>

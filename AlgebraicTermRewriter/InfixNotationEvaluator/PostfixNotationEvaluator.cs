@@ -122,16 +122,27 @@ namespace AlgebraicTermRewriter
 
 			if (stack.Count == 1)
 			{
+				string lastValue = stack.Pop();
 				int result = 0;
-				if (!int.TryParse(stack.Pop(), out result))
+				if (!int.TryParse(lastValue, out result))
 				{
-					throw new Exception("Last value on stack could not be parsed into an integer.");
+					throw new Exception($"Last value on stack could not be parsed into an integer. Value: \"{lastValue}\"");
 				}
 				return result;
 			}
 			else
 			{
-				throw new Exception("The input has too many values for the number of operators.");
+				int stackCount = 0;
+				string stackContents = "";
+				while (stack.Count > 0)
+				{
+					string value = stack.Pop();
+					stackContents += $"\"{value}\", ";
+					stackCount++;
+				}
+				stackContents = stackContents.TrimEnd(new char[] { ' ', ',' });
+
+				throw new Exception($"End of {nameof(PostfixNotationEvaluator)}.{nameof(Evaluate)} function and there is {stackCount} items left on the stack. Expected: 1. Stack.Contents: {stackContents}.");
 			}
 
 		} // method

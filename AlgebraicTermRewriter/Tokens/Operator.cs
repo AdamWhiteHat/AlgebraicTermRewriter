@@ -73,6 +73,11 @@ namespace AlgebraicTermRewriter
 			return new Operator(this.Symbol);
 		}
 
+		public bool Equals(IToken other)
+		{
+			return IToken.Equals(this, other);
+		}
+
 		public override string ToString()
 		{
 			return Contents;

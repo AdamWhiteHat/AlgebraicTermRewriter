@@ -75,7 +75,7 @@ namespace AlgebraicTermRewriter
 
 				char c = stack.Pop();
 
-				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))				
+				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))
 				{
 					string value = c.ToString();
 					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
@@ -85,15 +85,15 @@ namespace AlgebraicTermRewriter
 					}
 
 					// Handle negation
-					if (tokens.Any())
-					{
-						int index = tokens.Count - 1;
-						if (tokens[index].Contents == "-")
-						{
-							tokens[index] = new Operator('+');
-							value = value.Insert(0, "-");
-						}
-					}
+					//if (tokens.Any())
+					//{
+					//	int index = tokens.Count - 1;
+					//	if (tokens[index].Contents == "-")
+					//	{
+					//		tokens[index] = new Operator('+');
+					//		value = value.Insert(0, "-");
+					//	}
+					//}
 
 					newToken = new Number(int.Parse(value));
 				}

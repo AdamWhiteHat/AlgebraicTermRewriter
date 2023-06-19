@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using AlgebraicTermRewriter;
 
 namespace RewriterTests
 {
-	[TestClass]
+	[TestFixture]
 	public class BasicFunctions
 	{
 		static string[] problemStatement =
@@ -20,15 +20,15 @@ namespace RewriterTests
 		static Equation testEquation;
 		static Expression exp;
 
-		[ClassInitializeAttribute]
-		public static void Initialize(TestContext context)
+		[SetUp]
+		public static void Initialize()
 		{
 			testProblem = new Problem(problemStatement);
 			testEquation = (Equation)testProblem.Statements[0];
 			exp = testEquation.LeftHandSide;
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestInitializedSucceeded()
 		{
 			Assert.IsNotNull(testProblem);
@@ -36,67 +36,102 @@ namespace RewriterTests
 			Assert.IsNotNull(exp);
 			Print(problemStatement[0]);
 			Print("=");
-			Print(testEquation.ToString());
+			Print(testEquation);
 			Print();
-			Print(exp.ToString());
+			Print(exp);
 			Print();
 		}
 
-		[TestMethod]
+
+		[Test]
+		public void TestIsIsolatedMethod()
+		{
+			Equation expr_true1 = Equation.Parse("x = 10");
+			Equation expr_true2 = Equation.Parse("x = 2 * 5");
+			Equation expr_true3 = Equation.Parse("x = 4");
+
+			Equation expr_false1 = Equation.Parse("x + 4 = 14");
+			Equation expr_false2 = Equation.Parse("x - 3 = 7");
+			Equation expr_false3 = Equation.Parse("x + y = 13");
+			Equation expr_false4 = Equation.Parse("x - 4 = 2 * y");
+
+			Assert.IsTrue(expr_true1.IsVariableIsolated, expr_true1.ToString());
+			Assert.IsTrue(expr_true2.IsVariableIsolated, expr_true2.ToString());
+			Assert.IsTrue(expr_true3.IsVariableIsolated, expr_true3.ToString());
+
+			Assert.IsFalse(expr_false1.IsVariableIsolated, expr_false1.ToString());
+			Assert.IsFalse(expr_false2.IsVariableIsolated, expr_false2.ToString());
+			Assert.IsFalse(expr_false3.IsVariableIsolated, expr_false3.ToString());
+			Assert.IsFalse(expr_false4.IsVariableIsolated, expr_false4.ToString());
+		}
+
+		[Test]
 		public void TestExpressionExtensionMethods()
 		{
-			IToken elm = exp.TokenAt(2);
+			Expression expr = Expression.Parse("2 * x + 3");
+
+			IToken elm = expr.TokenAt(2);
 			Assert.AreEqual(TokenType.Variable, elm.Type);
 			Variable var = (Variable)elm;
 
-			Print(exp.ToString());
+			Print(expr);
 			Print("---");
 			Print();
-			Print("Selected token: " + var.ToString());
+			Print($"Selected token: {var}");
 			Print();
-			Print("RightOfToken: " + exp.RightOfToken(var).ToString());
-			Print("LeftOfToken: " + exp.LeftOfToken(var).ToString());
+			Print($"RightOfToken: {expr.RightOfToken(var)}");
+			Print($"LeftOfToken:  {expr.LeftOfToken(var)}");
 			Print();
 			Print("---");
 			Print();
 
-			IToken firstElm = exp.TokenAt(0);
-			IToken lastElm = exp.TokenAt(exp.TokenCount - 1);
+			IToken firstElm = expr.TokenAt(0);
+			IToken lastElm = expr.TokenAt(expr.TokenCount - 1);
 
-			Print(exp.LeftOfToken(firstElm).ToString());
-			Print(exp.RightOfToken(lastElm).ToString());
+			Print(expr.LeftOfToken(firstElm));
+			Print(expr.RightOfToken(lastElm));
 		}
 
-		[TestMethod]
+
+		[Test]
+		public void TestGatherOperatorNumberPairs()
+		{
+			Expression leftHandSide = Expression.Parse("2 * x + 4");
+			Print(leftHandSide);
+			Print();
+
+			List<Tuple<IOperator, INumber>> pairs = leftHandSide.GetOperatorTermIndexPairs();
+
+			Print(string.Join(Environment.NewLine, pairs.Select(tup => $"[op = {tup.Item1} ; num = {tup.Item2}]")));
+		}
+
+		[Test]
 		public void TestSimplify_AddVariableGroups()
 		{
 			// "5 * x + 3 * x"
 			string expected = "8 * x";
 			Expression expr = new Expression(new IToken[] { new Number(5), new Operator('*'), new Variable('x'), new Operator('+'), new Number(3), new Operator('*'), new Variable('x') });
 
-			expr.Simplify();
-
-			TestAssertResults(expr, expected);
+			var result = SimplifyEquation.Simplify(expr);
+			TestAssertResults(result, expected);
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestSimplify_UnitaryOperations()
 		{
 			string expected = "14";
 			Expression expr = new Expression(new IToken[] { new Operator('+'), new Number(14) });
 
-			expr.Simplify();
-
-			TestAssertResults(expr, expected);
+			var result = SimplifyEquation.Simplify(expr);
+			TestAssertResults(result, expected);
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestExtractToken()
 		{
 			Expression e1 = exp.Clone();
 			Expression e2 = exp.Clone();
 			Expression e3 = exp.Clone();
-
 
 			Print(ExtractInfo(e1, 0));
 			Print();
@@ -110,13 +145,13 @@ namespace RewriterTests
 		{
 			return
 			$"Index: {index}{Environment.NewLine}{Environment.NewLine}" +
-			$"Before: {e.ToString()}{Environment.NewLine}" +
+			$"Before: {e}{Environment.NewLine}" +
 			//$"Extract: {index.AsString()}{Environment.NewLine}" +
-			$"After: {e.ToString()}{Environment.NewLine}" +
+			$"After: {e}{Environment.NewLine}" +
 			$"---{Environment.NewLine}";
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestTypeResolution()
 		{
 			IToken isNum = new Number(3);
@@ -187,7 +222,10 @@ namespace RewriterTests
 			Assert.AreEqual(expected, actual);
 		}
 
-		public void Print(string message = " ") { Print("{0}", message); }
+		public void Print(object obj) { Print("{0}", obj); }
+
+		public void Print(string message = " ") { TestContext.WriteLine(message); }
+
 		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }
 
 		private TestContext testContextInstance;
@@ -195,6 +233,4 @@ namespace RewriterTests
 		public TestContext TestContext { get { return testContextInstance; } set { testContextInstance = value; } }
 
 	}
-
-
 }

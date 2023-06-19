@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace AlgebraicTermRewriter
 {
 	public static class TokenCollectionExtensionMethods
 	{
-		public static Tuple<int, int> GetLongestArithmeticRange(this IEnumerable<IToken> source)
+		public static Range GetLongestArithmeticRange(this IEnumerable<IToken> source)
 		{
 			int startIndex = -1;
 
@@ -17,7 +18,7 @@ namespace AlgebraicTermRewriter
 			bool isSequence = false;
 			int sequenceCount = 0;
 
-			List<Tuple<int, int>> results = new List<Tuple<int, int>>();
+			List<Range> results = new List<Range>();
 			foreach (IToken e in source)
 			{
 				currentIndex++;
@@ -55,7 +56,7 @@ namespace AlgebraicTermRewriter
 				{
 					if (isSequence == true)
 					{
-						results.Add(new Tuple<int, int>(startIndex, sequenceCount));
+						results.Add(new Range(startIndex, sequenceCount));
 					}
 
 					startIndex = -1;
@@ -66,19 +67,16 @@ namespace AlgebraicTermRewriter
 
 			if (isSequence == true)
 			{
-				results.Add(new Tuple<int, int>(startIndex, sequenceCount));
+				results.Add(new Range(startIndex, sequenceCount));
 			}
 
 			if (results.Any())
 			{
-				List<int> lengths = results.Select(t => t.Item2 - t.Item1).ToList();
-
-				int maxLength = lengths.Max();
-
-				return results[lengths.IndexOf(maxLength)];
+				int maxCount = results.Max(r => r.Count);
+				return results.Find(r => r.Count == maxCount);
 			}
 
-			return null;
+			return Range.Empty;
 		}
 
 		public static Tuple<List<IToken>, int> FindLongestSubsequenceOfArithmeticTokens(this IEnumerable<IToken> source)
@@ -122,27 +120,27 @@ namespace AlgebraicTermRewriter
 			acceptResultBehavior.Invoke(sequence, counter);
 
 
-			int longest = subSets.Count < 1 ? 0 : subSets.Max(l => l.Item1.Count());
 
-			if (longest > 0)
+			if (!subSets.Any())
 			{
-
-				Tuple<List<IToken>, int> result = subSets.Where(l => l.Item1.Count() == longest).FirstOrDefault();
-
-				if (result != null)
-				{
-					var lst = result.Item1;
-					if (lst.Last().Type == TokenType.Operator)
-					{
-						lst.Remove(lst.Last());
-						return new Tuple<List<IToken>, int>(lst, result.Item2);
-					}
-				}
-
-				return result;
+				return new Tuple<List<IToken>, int>(new List<IToken>(), -1);
 			}
 
-			return new Tuple<List<IToken>, int>(new List<IToken>(), -1);
+			int longest = subSets.Max(l => l.Item1.Count());
+
+			Tuple<List<IToken>, int> result = subSets.Where(l => l.Item1.Count() == longest).FirstOrDefault();
+
+			if (result != null)
+			{
+				var lst = result.Item1;
+				if (lst.Last().Type == TokenType.Operator)
+				{
+					lst.Remove(lst.Last());
+					return new Tuple<List<IToken>, int>(lst, result.Item2);
+				}
+			}
+
+			return result;
 		}
 	}
 

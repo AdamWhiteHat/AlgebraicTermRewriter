@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using static AlgebraicTermRewriter.IToken;
 
@@ -22,6 +23,7 @@ namespace AlgebraicTermRewriter
 	public interface INumber : ITerm
 	{
 		int Value { get; }
+		void Negate();
 	}
 
 	/// <summary>
@@ -52,10 +54,11 @@ namespace AlgebraicTermRewriter
 	/// The most basic token in a mathematical sentence.
 	/// Could also be thought of as a Token, from a parsing perspective.
 	/// </summary>
-	public interface IToken : ICloneable<IToken>
+	public interface IToken : IEquatable<IToken>, ICloneable<IToken>
 	{
 		string Contents { get; }
 		TokenType Type { get; }
+		static bool Equals(IToken left, IToken right) => (left.Type != right.Type) ? false : (left.Contents == right.Contents);
 		string ToString();
 	}
 

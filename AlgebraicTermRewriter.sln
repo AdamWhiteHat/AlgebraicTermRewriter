@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgebraicTermRewriter", "AlgebraicTermRewriter\AlgebraicTermRewriter.csproj", "{372DAE8C-A479-4DB5-8ACD-BF98E372B857}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RewriterTests", "RewriterTests\RewriterTests.csproj", "{000DB42E-BEBC-4F35-B3C7-0D466D30064B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAlgebraicTermRewriter", "TestAlgebraicTermRewriter\TestAlgebraicTermRewriter.csproj", "{A1FB2352-AA8C-48A6-B486-E261C1DDB2F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,12 +17,15 @@ Global
 		{372DAE8C-A479-4DB5-8ACD-BF98E372B857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{372DAE8C-A479-4DB5-8ACD-BF98E372B857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{372DAE8C-A479-4DB5-8ACD-BF98E372B857}.Release|Any CPU.Build.0 = Release|Any CPU
-		{000DB42E-BEBC-4F35-B3C7-0D466D30064B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{000DB42E-BEBC-4F35-B3C7-0D466D30064B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{000DB42E-BEBC-4F35-B3C7-0D466D30064B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{000DB42E-BEBC-4F35-B3C7-0D466D30064B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1FB2352-AA8C-48A6-B486-E261C1DDB2F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1FB2352-AA8C-48A6-B486-E261C1DDB2F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1FB2352-AA8C-48A6-B486-E261C1DDB2F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1FB2352-AA8C-48A6-B486-E261C1DDB2F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {600B4B74-8A5A-4165-8C65-C895E9D5BBE1}
 	EndGlobalSection
 EndGlobal

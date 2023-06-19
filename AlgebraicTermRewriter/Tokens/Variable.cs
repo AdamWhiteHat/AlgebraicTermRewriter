@@ -33,6 +33,11 @@ namespace AlgebraicTermRewriter
 			return result;
 		}
 
+		public bool Equals(IToken other)
+		{
+			return IToken.Equals(this, other);
+		}
+
 		public bool Equals(Variable other)
 		{
 			return (this.Symbol == other.Symbol);

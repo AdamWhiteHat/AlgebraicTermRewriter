@@ -7,9 +7,9 @@ namespace AlgebraicTermRewriter
 {
 	public class IsolateSingleVariable : IRewriteRule
 	{
-		public int ApplyOrder => 0;
+		public static int ApplyOrder => 0;
 
-		public bool ShouldApplyRule(Equation equation)
+		public static bool ShouldApplyRule(Equation equation)
 		{
 			if (!equation.LeftHandSide.Variables.Any() && !equation.RightHandSide.Variables.Any())
 			{
@@ -22,7 +22,7 @@ namespace AlgebraicTermRewriter
 			return true;
 		}
 
-		public Equation ApplyRule(Equation equation)
+		public static Equation ApplyRule(Equation equation)
 		{
 			// 1. Choose variable to isolate
 			(IVariable Selected, Expression From, Expression To) = ChooseVariableToIsolate(equation);
@@ -49,37 +49,37 @@ namespace AlgebraicTermRewriter
 			throw new NotImplementedException();
 		}
 
-		private (IVariable Selected, Expression From, Expression To) ChooseVariableToIsolate(Equation equation)
+		private static (IVariable Selected, Expression From, Expression To) ChooseVariableToIsolate(Equation equation)
 		{
-			List<(Expression Expr, SideOfEquation Side)> sides = new List<(Expression Expr, SideOfEquation Side)>()
+			List<(Expression Expr, RelativeDirection Side)> sides = new List<(Expression Expr, RelativeDirection Side)>()
 			{
-				(equation.LeftHandSide, SideOfEquation.Left),
-				(equation.RightHandSide, SideOfEquation.Right)
+				(equation.LeftHandSide, RelativeDirection.Left),
+				(equation.RightHandSide, RelativeDirection.Right)
 			};
 
 			var variableSide = sides.Where(t => t.Expr.Variables.Count() == 0).FirstOrDefault();
 			var singleVarSide = sides.Where(t => t.Expr.Variables.Count() == 1).OrderBy(o => o.Expr.RankIsolationComplexity()).FirstOrDefault();
 			var elseVarSide = sides.OrderBy(o => o.Expr.RankIsolationComplexity()).FirstOrDefault();
 
-			if (variableSide == default((Expression, SideOfEquation)))
+			if (variableSide == default((Expression, RelativeDirection)))
 			{
 				variableSide = sides.Where(t => t.Expr.Variables.Count() == 1).OrderBy(o => o.Expr.RankIsolationComplexity()).FirstOrDefault();
 			}
-			if (variableSide == default((Expression, SideOfEquation)))
+			if (variableSide == default((Expression, RelativeDirection)))
 			{
 				variableSide = sides.OrderBy(o => o.Expr.RankIsolationComplexity()).FirstOrDefault();
 			}
-			if (variableSide == default((Expression, SideOfEquation)))
+			if (variableSide == default((Expression, RelativeDirection)))
 			{
 				throw new Exception($"{nameof(sides)} is empty? How did OrderBy fail?");
 			}
 
-			SideOfEquation side = variableSide.Side;
+			RelativeDirection side = variableSide.Side;
 			Expression from = variableSide.Expr;
 			Expression to = sides.Where(t => t.Side != side).Single().Expr;
 			IVariable selected = from.Variables.OrderBy(v => RankVariable(from, v)).First();
 
-			if (side != SideOfEquation.Left)
+			if (side != RelativeDirection.Left)
 			{
 				equation.SwapLeftRight();
 			}

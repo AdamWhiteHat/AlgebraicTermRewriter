@@ -22,6 +22,11 @@ namespace AlgebraicTermRewriter
 			return new Token() { Contents = this.Contents, Type = this.Type };
 		}
 
+		public bool Equals(IToken other)
+		{
+			return IToken.Equals(this, other);
+		}
+
 		public override string ToString()
 		{
 			return Contents;

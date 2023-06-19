@@ -3,12 +3,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using AlgebraicTermRewriter;
 
 namespace RewriterTests
 {
-	[TestClass]
+	[TestFixture]
 	public class SystemsOfEquations
 	{
 		/*
@@ -47,5 +47,17 @@ namespace RewriterTests
 			y = 2
 			z = 3
 		*/
+
+		public void Print(object obj) { Print("{0}", obj); }
+
+		public void Print(string message = " ") { TestContext.WriteLine(message); }
+
+		public void Print(string message, params object[] args) { TestContext.WriteLine(message, args); }
+
+		private TestContext testContextInstance;
+
+		public TestContext TestContext { get { return testContextInstance; } set { testContextInstance = value; } }
 	}
+
+
 }

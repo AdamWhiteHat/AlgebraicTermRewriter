@@ -126,7 +126,8 @@ namespace RewriterTests
 				resultActual = prob.ToString();
 			}
 
-			Print($"Result: [{resultActual}]           Expecting: ({equation[1]})");
+			Print($"Actual:   \"{resultActual}\"");
+			Print($"Expected: \"{equation[1]}\"");
 			Print();
 			Print("-----");
 			Print();
@@ -190,12 +191,11 @@ namespace RewriterTests
 
 			Print("-----");
 			Print();
-			Print($"Input: {exp}");
+			Print($"Input:    \"{exp}\"");
 			Print();
-
-
 			var result = SimplifyEquation.Simplify(exp);
-			Print($"Result: \"{result}\"           Expecting: \"{expected}\"");
+			Print($"Actual:   \"{result}\"");
+			Print($"Expected: \"{expected}\"");
 			Print();
 
 			string actual = result.ToString();

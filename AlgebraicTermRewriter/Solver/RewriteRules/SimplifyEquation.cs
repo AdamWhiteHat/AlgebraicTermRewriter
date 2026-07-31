@@ -11,7 +11,7 @@ namespace AlgebraicTermRewriter
 
 		public static bool ShouldApplyRule(Equation equation)
 		{
-			return equation.OnlyArithmeticTokens();
+			return equation.CanSimplify();
 		}
 
 		public static Equation ApplyRule(Equation equation)

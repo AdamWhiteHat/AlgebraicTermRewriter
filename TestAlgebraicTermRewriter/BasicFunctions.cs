@@ -147,7 +147,7 @@ namespace RewriterTests
 			$"Index: {index}{Environment.NewLine}{Environment.NewLine}" +
 			$"Before: {e}{Environment.NewLine}" +
 			//$"Extract: {index.AsString()}{Environment.NewLine}" +
-			$"After: {e}{Environment.NewLine}" +
+			$"After:  {e}{Environment.NewLine}" +
 			$"---{Environment.NewLine}";
 		}
 
@@ -214,7 +214,8 @@ namespace RewriterTests
 		{
 			string actual = expr.ToString();
 
-			Print($"Result: [{actual}]           Expecting: ({expected})");
+			Print($"Actual:   \"{actual}\"");
+			Print($"Expected: \"{expected}\"");
 			Print();
 			Print("-----");
 			Print();

@@ -52,9 +52,9 @@ namespace AlgebraicTermRewriter
 
 		private void SolveEquation(Equation eq)
 		{
-			if (eq.OnlyArithmeticTokens())
+			if (eq.CanSimplify())
 			{
-				Solutions.Add(IsArithmeticEquasionTrue(eq).ToString());
+				Solutions.Add(IsArithmeticEquationTrue(eq).ToString());
 				return;
 			}
 
@@ -272,7 +272,7 @@ namespace AlgebraicTermRewriter
 			SolvedVariables.Add(variable.Symbol, numericValue.Value);
 		}
 
-		private bool IsArithmeticEquasionTrue(Equation input)
+		private bool IsArithmeticEquationTrue(Equation input)
 		{
 			var left = input.LeftHandSide;
 			var right = input.RightHandSide;

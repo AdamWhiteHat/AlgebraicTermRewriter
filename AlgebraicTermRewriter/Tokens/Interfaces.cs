@@ -58,7 +58,22 @@ namespace AlgebraicTermRewriter
 	{
 		string Contents { get; }
 		TokenType Type { get; }
-		static bool Equals(IToken left, IToken right) => (left.Type != right.Type) ? false : (left.Contents == right.Contents);
+		static bool Equals(IToken left, IToken right)
+		{
+			if (left == null)
+			{
+				return (right == null);
+			}
+			else if (right == null)
+			{
+				return false;
+			}
+			if (left.Type != right.Type)
+			{
+				return false;
+			}
+			return (left.Contents == right.Contents);
+		}
 		string ToString();
 	}
 

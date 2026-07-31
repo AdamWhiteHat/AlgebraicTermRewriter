@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
-		<LangVersion>11.0</LangVersion>
+	<PropertyGroup>		
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<Nullable>annotations</Nullable>
+		<ImplicitUsings>false</ImplicitUsings>
 	</PropertyGroup>
 
 	<PropertyGroup>

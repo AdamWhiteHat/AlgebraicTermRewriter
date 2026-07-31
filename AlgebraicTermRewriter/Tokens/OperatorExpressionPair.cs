@@ -28,6 +28,34 @@ namespace AlgebraicTermRewriter
 			Orientation = orientation;
 		}
 
+		public bool Equals(OperatorExpressionPair other)
+		{
+			return OperatorExpressionPair.Equals(this, other);
+		}
+
+		public static bool Equals(OperatorExpressionPair left, OperatorExpressionPair right)
+		{
+			if (left == null)
+			{
+				return (right == null);
+			}
+			else if (right == null)
+			{
+				return false;
+			}
+
+			if (left.Operator != right.Operator)
+			{
+				return false;
+			}
+			if (!SubExpression.Equals(left.Expr, right.Expr))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		public override string ToString()
 		{
 			if (Orientation == InsertOrientation.Left)

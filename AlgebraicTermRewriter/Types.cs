@@ -26,7 +26,8 @@ namespace AlgebraicTermRewriter
 		Number,
 		Variable,
 		Operator,
-		Comparison
+		Comparison,
+		Subexpression
 	}
 
 	public enum OperationType

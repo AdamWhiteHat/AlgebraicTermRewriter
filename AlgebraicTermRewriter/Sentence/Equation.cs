@@ -23,6 +23,9 @@ namespace AlgebraicTermRewriter
 			LeftHandSide = leftExpression;
 			ComparisonOperator = comparison;
 			RightHandSide = rightExpression;
+
+			LeftHandSide.Parent = this;
+			RightHandSide.Parent = this;
 		}
 
 		public static Equation Parse(string equationText)
@@ -40,6 +43,51 @@ namespace AlgebraicTermRewriter
 			{
 				throw new Exception($"{nameof(equationText)} does not contain an equality or comparison operator (=, >, <, >=, <=), which is what defines an {nameof(Equation)}. Perhaps you meant to parse it as an {nameof(Expression)} instead?");
 			}
+		}
+
+		public Equation Simplify()
+		{
+			if (!this.CanSimplify())
+			{
+				return this;
+			}
+			return new Equation(LeftHandSide.Simplify(), ComparisonOperator, RightHandSide.Simplify());
+		}
+
+		public bool CanSimplify()
+		{
+			return LeftHandSide.CanSimplify() || RightHandSide.CanSimplify();
+		}
+
+		public bool Equals(Equation other)
+		{
+			return Equation.Equals(this, other);
+		}
+
+		public static bool Equals(Equation left, Equation right)
+		{
+			if (left == null)
+			{
+				return (right == null);
+			}
+			else if (right == null)
+			{
+				return false;
+			}
+
+			if (left.ComparisonOperator != right.ComparisonOperator)
+			{
+				return false;
+			}
+			if (!Expression.Equals(left.LeftHandSide, right.LeftHandSide))
+			{
+				return false;
+			}
+			if (!Expression.Equals(left.RightHandSide, right.RightHandSide))
+			{
+				return false;
+			}
+			return true;
 		}
 
 		public Equation Clone()

@@ -8,7 +8,7 @@ namespace AlgebraicTermRewriter
 {
 	public static class ExpressionExtensionMethods_Checks
 	{
-		public static Expression Substitute(this Expression source, IVariable variable, IToken[] expression)
+		public static bool Substitute(this Expression source, IVariable variable, IToken[] expression)
 		{
 			if (source.Tokens.Any(e => e.Contents == variable.Contents))
 			{
@@ -18,20 +18,15 @@ namespace AlgebraicTermRewriter
 				{
 					IToken currentToken = source.TokenAt(index);
 
-					if (currentToken.Contents == variable.Contents)
+					if (IToken.Equals(currentToken, variable))
 					{
 						source.RemoveAt(index);
-						source.InsertRange(index, new SubExpression(expression.ToArray()));
+						source.InsertRange(index, new SubExpression(expression));
+						return true;
 					}
 				}
 			}
-			return source;
-		}
-
-		public static bool OnlyArithmeticTokens(this Expression source)
-		{
-			return (!source.Variables.Any()
-				&& source.Numbers.Any());
+			return false;
 		}
 
 		public static int RankComplexity(this Expression source)
@@ -119,6 +114,83 @@ namespace AlgebraicTermRewriter
 			return result;
 		}
 
+		public static OperatorExpressionPair Extract(this Expression source, IVariable variable)
+		{
+			return Extract(source, (IToken)variable);
+		}
+
+		public static OperatorExpressionPair Extract(this Expression source, INumber number)
+		{
+			return Extract(source, (IToken)number);
+		}
+
+		public static OperatorExpressionPair Extract(this Expression source, SubExpression subExpression)
+		{
+			return Extract(source, (IToken)subExpression);
+		}
+
+		private static OperatorExpressionPair Extract(this Expression source, IToken token)
+		{
+			IToken left = source.LeftOfToken(token);
+			IToken right = source.RightOfToken(token);
+
+			IToken opCandidate = null;
+			InsertOrientation insertOrientation = InsertOrientation.Right;
+
+			if (source.TokenCount == 1)
+			{
+				source.Remove(token);
+				source.Add(new Number(0));
+				return new OperatorExpressionPair(new Operator('-'), new SubExpression(new IToken[] { token }), insertOrientation);
+			}
+			else if (left.Equals(Token.None))
+			{
+				opCandidate = right;
+				insertOrientation = InsertOrientation.Left;
+			}
+			else if (right.Equals(Token.None))
+			{
+				opCandidate = left;
+				insertOrientation = InsertOrientation.Right;
+			}
+			else if (left.Contents == "*")
+			{
+				opCandidate = left;
+				insertOrientation = InsertOrientation.Right;
+			}
+			else if (right.Contents == "*")
+			{
+				opCandidate = right;
+				insertOrientation = InsertOrientation.Left;
+			}
+
+			IOperator oper = opCandidate as IOperator;
+			if (oper == null)
+			{
+				throw new FormatException("The token adjacent to the variable must be an operator.");
+			}
+
+			source.Remove(oper);
+			source.Remove(token);
+			IOperator inverseOper = Operator.GetInverse(oper);
+
+			/*
+			SubExpression subExpression = null;
+
+			if (token is SubExpression)
+			{
+				subExpression = token as SubExpression;
+			}
+
+			if (subExpression == null)
+			{
+				subExpression = new SubExpression(new IToken[] { token });
+			}
+			*/
+
+			return new OperatorExpressionPair(inverseOper, new SubExpression(new IToken[] { token }), insertOrientation);
+		}
+
 		public static OperatorExpressionPair Extract(this Expression source, IOperator op, SubExpression subExpr)
 		{
 			return Extract(source, op, subExpr.ToArray());
@@ -147,14 +219,14 @@ namespace AlgebraicTermRewriter
 			}
 
 			source.Remove(op);
-			oper = Operator.GetInverse(oper);
+			IOperator inverseOper = Operator.GetInverse(oper);
 
 			foreach (IToken term in terms)
 			{
 				source.Remove(term);
 			}
 
-			return new OperatorExpressionPair(oper, new SubExpression(terms), orientation);
+			return new OperatorExpressionPair(inverseOper, new SubExpression(terms), orientation);
 		}
 
 		public static void SetToAdditiveInverse(this Expression source)

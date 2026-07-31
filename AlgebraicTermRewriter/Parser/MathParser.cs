@@ -66,16 +66,21 @@ namespace AlgebraicTermRewriter
 				throw new ArgumentException("An expression contains no comparison symbols. You want an Equation.");
 			}
 
-			List<IToken> tokens = new List<IToken>();
-
 			Stack<char> stack = new Stack<char>(input.Replace(" ", "").Reverse());
+
+			IEnumerable<IToken> tokens = ParseExpression(stack);
+
+			Expression result = new Expression(tokens.ToArray());
+			return result;
+		}
+
+		private static IEnumerable<IToken> ParseExpression(Stack<char> stack)
+		{
 			while (stack.Any())
 			{
-				IToken newToken = null;
-
 				char c = stack.Pop();
 
-				if (Types.Numbers.Contains(c) || (tokens.Count() == 0 && c == '-'))
+				if (Types.Numbers.Contains(c) || (c == '-' && Types.Numbers.Contains(stack.Peek())))
 				{
 					string value = c.ToString();
 					while (stack.Any() && Types.Numbers.Contains(stack.Peek()))
@@ -95,26 +100,35 @@ namespace AlgebraicTermRewriter
 					//	}
 					//}
 
-					newToken = new Number(int.Parse(value));
+					yield return new Number(int.Parse(value));
 				}
 				else if (Types.Operators.Contains(c))
 				{
-					newToken = new Operator(c);
+					yield return new Operator(c);
 				}
 				else if (Types.Variables.Contains(c))
 				{
-					newToken = new Variable(c);
+					yield return new Variable(c);
+				}
+				else if (c == Types.Parenthesis[1])
+				{
+					break;
+				}
+				else if (c == Types.Parenthesis[0])
+				{
+					IEnumerable<IToken> tokens = ParseExpression(stack);
+
+					yield return new SubExpression(tokens.ToArray());
 				}
 				else
 				{
 					throw new FormatException($"Unrecognized token: '{c}'.");
 				}
-
-				tokens.Add(newToken);
 			}
 
-			Expression result = new Expression(tokens.ToArray());
-			return result;
+			yield break;
 		}
+
+
 	}
 }

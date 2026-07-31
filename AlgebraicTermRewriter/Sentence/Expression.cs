@@ -1,10 +1,11 @@
-﻿using System;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AlgebraicTermRewriter
 {
@@ -17,11 +18,35 @@ namespace AlgebraicTermRewriter
 		public IEnumerable<IOperator> Operators { get { return Tokens.Where(e => e.Type == TokenType.Operator).Select(e => (e as IOperator)); } }
 		public IEnumerable<INumber> Numbers { get { return Tokens.Where(e => e.Type == TokenType.Number).Select(e => (e as INumber)); } }
 		public IEnumerable<IVariable> Variables { get { return Tokens.Where(e => e.Type == TokenType.Variable).Select(e => (e as IVariable)); } }
+		public IEnumerable<SubExpression> SubExpressions { get { return Tokens.Where(e => e.Type == TokenType.Subexpression).Select(e => (e as SubExpression)); } }
 		public IEnumerable<ITerm> Terms { get { return Tokens.Where(e => e.Type == TokenType.Number || e.Type == TokenType.Variable).Select(e => (e as ITerm)); } }
 
-		public IEnumerable<IToken> Tokens { get { return SubExpressions.SelectMany(s => s).ToArray(); } }
+		public IEnumerable<IToken> Tokens { get { return _tokens.AsEnumerable(); } }
+		private List<IToken> _tokens = null;
 
-		public List<SubExpression> SubExpressions = new List<SubExpression>();
+		public Equation Parent { get; set; }
+
+		public RelativeDirection? SideOfEquality
+		{
+			get
+			{
+				RelativeDirection? result = null;
+				Equation parentEquation = this.Parent;
+				if (parentEquation != null && !Equation.Equals(parentEquation, Equation.Empty))
+				{
+
+					if (Expression.Equals(this, parentEquation.LeftHandSide))
+					{
+						result = RelativeDirection.Left;
+					}
+					else if (Expression.Equals(this, parentEquation.RightHandSide))
+					{
+						result = RelativeDirection.Right;
+					}
+				}
+				return result;
+			}
+		}
 
 		public int TokenCount { get { return Tokens.Count(); } }
 
@@ -40,13 +65,13 @@ namespace AlgebraicTermRewriter
 
 		private Expression()
 		{
-			SubExpressions = new List<SubExpression>();
+			_tokens = new List<IToken>();
 		}
 
 		public Expression(IToken[] tokens)
 			: this()
 		{
-			SubExpressions.Add(new SubExpression(tokens));
+			_tokens.AddRange(tokens);
 		}
 
 		public static Expression Parse(string expressionText)
@@ -66,9 +91,23 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
+		public Expression Simplify()
+		{
+			if (this._tokens.CanSimplify())
+			{
+				return Expression.Parse(InfixNotationEvaluator.Evaluate(this.ToString()).ToString());
+			}
+			return this;
+		}
+
+		public bool CanSimplify()
+		{
+			return this._tokens.CanSimplify();
+		}
+
 		public bool Contains(IToken token)
 		{
-			return Contains(token.Contents);
+			return Tokens.Any(tok => IToken.Equals(tok, token));
 		}
 
 		public bool Contains(string contents)
@@ -83,80 +122,39 @@ namespace AlgebraicTermRewriter
 				return Token.None;
 			}
 
-			return Tokens.ElementAt(index).Clone();
+			return Tokens.ElementAt(index);
 		}
 
 		internal void AddToken(IToken newToken)
 		{
 			IToken clone = newToken.Clone();
-			if (SubExpressions.Count == 1)
-			{
-				SubExpressions[0].Add(clone);
-			}
-			else
-			{
-				SubExpressions.Add(new SubExpression() { clone });
-			}
+			_tokens.Add(clone);
 		}
 
 		internal void ReplaceAt(int index, IToken replacementToken)
 		{
-			Tuple<SubExpression, int> result = GetSubExpressionAtIndex(index);
-			int subIndex = result.Item2;
-			SubExpression found = result.Item1;
-
-			if (found != null)
-			{
-				IToken clone = replacementToken.Clone();
-				found.RemoveAt(subIndex);
-				found.Insert(subIndex, clone);
-			}
+			IToken clone = replacementToken.Clone();
+			_tokens.RemoveAt(index);
+			_tokens.Insert(index, clone);
 		}
 
 		internal void RemoveAt(int index)
 		{
-			Tuple<SubExpression, int> result = GetSubExpressionAtIndex(index);
-			int subIndex = result.Item2;
-			SubExpression found = result.Item1;
-
-			if (found != null)
-			{
-				found.RemoveAt(subIndex);
-			}
-		}
-
-		private Tuple<SubExpression, int> GetSubExpressionAtIndex(int index)
-		{
-			int subIndex = 0;
-			int globalIndex = 0;
-			foreach (SubExpression subExpr in SubExpressions)
-			{
-				subIndex = 0;
-				foreach (IToken token in subExpr)
-				{
-					if (globalIndex == index)
-					{
-						return new Tuple<SubExpression, int>(subExpr, subIndex);
-					}
-					subIndex++;
-					globalIndex++;
-				}
-			}
-			throw new IndexOutOfRangeException();
+			_tokens.RemoveAt(index);
 		}
 
 		internal void Remove(IToken token)
 		{
-			int index = 0;
-			int maxIndex = SubExpressions.Count;
-			while (index < maxIndex)
+			int index = IndexOf(token);
+			if (index != -1)
 			{
-				if (SubExpressions[index].Contains(token))
-				{
-					SubExpressions[index].Remove(token);
-				}
-				index++;
+				_tokens.RemoveAt(index);
 			}
+		}
+
+		internal int RemoveAll(IToken token)
+		{
+			return _tokens.RemoveAll(t => IToken.Equals(t, token));
 		}
 
 		internal void RemoveRange(Range range)
@@ -175,7 +173,7 @@ namespace AlgebraicTermRewriter
 
 		internal int IndexOf(IToken token)
 		{
-			return Tokens.ToList().FindIndex(t => t.Contents.Equals(token.Contents));
+			return _tokens.FindIndex(t => IToken.Equals(t, token));
 		}
 
 		public void Insert(OperatorExpressionPair pair)
@@ -198,49 +196,23 @@ namespace AlgebraicTermRewriter
 
 		public void Add(IToken item)
 		{
-			SubExpressions.Last().Add(item);
+			_tokens.Add(item);
 		}
 
 		public void AddRange(SubExpression collection)
 		{
-			SubExpressions.Last().AddRange(collection);
+			_tokens.AddRange(collection);
 		}
 
 		public void Insert(int index, IToken item)
 		{
 			IToken clone = item.Clone();
-
-			if (SubExpressions.Count == 1)
-			{
-				SubExpressions[0].Insert(index, clone);
-			}
-			else
-			{
-				Tuple<SubExpression, int> result = GetSubExpressionAtIndex(index);
-				int subIndex = result.Item2;
-				SubExpression found = result.Item1;
-				if (found != null)
-				{
-					found.Insert(subIndex, clone);
-				}
-			}
+			_tokens.Insert(index, clone);
 		}
+
 		public void InsertRange(int index, SubExpression collection)
 		{
-			if (SubExpressions.Count == 1)
-			{
-				SubExpressions[0].InsertRange(index, collection);
-			}
-			else
-			{
-				Tuple<SubExpression, int> result = GetSubExpressionAtIndex(index);
-				int subIndex = result.Item2;
-				SubExpression found = result.Item1;
-				if (found != null)
-				{
-					found.InsertRange(subIndex, collection);
-				}
-			}
+			_tokens.InsertRange(index, collection.AsEnumerable());
 		}
 
 		/// <summary>
@@ -303,6 +275,40 @@ namespace AlgebraicTermRewriter
 			return weight;
 		}
 
+		public bool Equals(Expression other)
+		{
+			return Expression.Equals(this, other);
+		}
+
+		public static bool Equals(Expression left, Expression right)
+		{
+			if (left == null)
+			{
+				return (right == null);
+			}
+			else if (right == null)
+			{
+				return false;
+			}
+
+			if (left.TokenCount != right.TokenCount)
+			{
+				return false;
+			}
+
+			int index = 0;
+			while (index < left.TokenCount)
+			{
+				if (!IToken.Equals(left.TokenAt(index), right.TokenAt(index)))
+				{
+					return false;
+				}
+				index++;
+			}
+
+			return true;
+		}
+
 		public Expression Clone()
 		{
 			return new Expression(this.Tokens.Select(tok => tok.Clone()).ToArray());
@@ -310,11 +316,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			if (SubExpressions.Count == 1)
-			{
-				return SubExpressions.Single().ToString();
-			}
-			return string.Join(" ", SubExpressions.Select(e => e.Count == 1 ? e.ToString() : $"({e})"));
+			return string.Join(" ", _tokens.Select(e => e.ToString()));
 		}
 	}
 }

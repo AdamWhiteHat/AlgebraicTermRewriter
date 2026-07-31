@@ -13,21 +13,17 @@ namespace AlgebraicTermRewriter
 			return source.LeftHandSide.Variables.Concat(source.RightHandSide.Variables).Distinct().Count();
 		}
 
-		public static void Substitute(this Equation source, IVariable variable, Token[] expression)
+		public static bool Substitute(this Equation source, IVariable variable, Token[] expression)
 		{
-			source.LeftHandSide.Substitute(variable, expression);
-			source.RightHandSide.Substitute(variable, expression);
+			bool leftSuccess = source.LeftHandSide.Substitute(variable, expression);
+			bool rightSuccess = source.RightHandSide.Substitute(variable, expression);
+			return (leftSuccess || rightSuccess);
 		}
 
 		public static void ApplyToBothSides(this Equation source, OperatorExpressionPair pair)
 		{
 			source.LeftHandSide.Insert(pair);
 			source.RightHandSide.Insert(pair);
-		}
-
-		public static bool OnlyArithmeticTokens(this Equation source)
-		{
-			return source.LeftHandSide.OnlyArithmeticTokens() && source.RightHandSide.OnlyArithmeticTokens();
 		}
 
 		public static void EnsureVariableOnLeft(this Equation source)

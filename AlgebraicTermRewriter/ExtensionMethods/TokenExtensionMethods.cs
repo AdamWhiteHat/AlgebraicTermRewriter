@@ -9,6 +9,27 @@ namespace AlgebraicTermRewriter
 {
 	public static class TokenCollectionExtensionMethods
 	{
+		public static bool CanSimplify(this List<IToken> source)
+		{
+			if (source.Any(t => t.Type == TokenType.Variable))
+			{
+				return false;
+			}
+
+			if (source.Any(t => t.Type == TokenType.Subexpression))
+			{
+				foreach (var subExpr in source.Where(e => e.Type == TokenType.Subexpression).Select(e => (e as SubExpression)))
+				{
+					if (!subExpr.ToList().CanSimplify())
+					{
+						return false;
+					}
+				}
+			}
+
+			return source.All(t => t.Type == TokenType.Number || t.Type == TokenType.Operator);
+		}
+
 		public static Range GetLongestArithmeticRange(this IEnumerable<IToken> source)
 		{
 			int startIndex = -1;

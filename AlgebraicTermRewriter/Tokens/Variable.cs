@@ -23,6 +23,29 @@ namespace AlgebraicTermRewriter
 			Symbol = symbol;
 		}
 
+		public static Variable Parse(string text)
+		{
+			if (string.IsNullOrWhiteSpace(text))
+			{
+				throw new ArgumentException($"{nameof(text)} cannot be null, empty or whitespace.");
+			}
+			string trimmedText = text.Trim();
+
+			if (trimmedText.Length != 1)
+			{
+				throw new ArgumentException($"{nameof(text)} must be a single character. {nameof(text)}: \"{text}\".");
+			}
+
+			char inputChar = trimmedText[0];
+
+			if (!Types.Variables.Contains(inputChar))
+			{
+				throw new Exception($"{nameof(text)} must be an alpha character: {Types.Variables}. {nameof(text)}: \"{text}\".");
+			}
+
+			return new Variable(inputChar);
+		}
+
 		public IToken Clone()
 		{
 			Variable result = new Variable(this.Symbol);

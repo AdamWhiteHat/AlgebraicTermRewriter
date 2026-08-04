@@ -39,13 +39,14 @@
 			// 
 			labelNumber.AutoSize = true;
 			labelNumber.ContextMenuStrip = contextMenu;
-			labelNumber.Location = new System.Drawing.Point(3, 3);
+			labelNumber.Location = new System.Drawing.Point(0, 0);
 			labelNumber.Margin = new System.Windows.Forms.Padding(0);
+			labelNumber.MinimumSize = new System.Drawing.Size(6, 35);
 			labelNumber.Name = "labelNumber";
-			labelNumber.Padding = new System.Windows.Forms.Padding(3);
-			labelNumber.Size = new System.Drawing.Size(20, 21);
+			labelNumber.Size = new System.Drawing.Size(14, 35);
 			labelNumber.TabIndex = 0;
 			labelNumber.Text = "0";
+			labelNumber.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// contextMenu
 			// 
@@ -72,9 +73,9 @@
 			AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			ContextMenuStrip = contextMenu;
 			Controls.Add(labelNumber);
+			Margin = new System.Windows.Forms.Padding(0);
 			Name = "NumberControl";
-			Padding = new System.Windows.Forms.Padding(3);
-			Size = new System.Drawing.Size(26, 30);
+			Size = new System.Drawing.Size(14, 35);
 			contextMenu.ResumeLayout(false);
 			ResumeLayout(false);
 			PerformLayout();

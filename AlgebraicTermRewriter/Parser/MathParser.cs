@@ -74,7 +74,7 @@ namespace AlgebraicTermRewriter
 			return result;
 		}
 
-		private static IEnumerable<IToken> ParseExpression(Stack<char> stack)
+		public static IEnumerable<IToken> ParseExpression(Stack<char> stack)
 		{
 			while (stack.Any())
 			{

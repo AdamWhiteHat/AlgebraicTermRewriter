@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace AlgebraicTermRewriterWinforms.Controls
 {
-	partial class EquationControl
+	partial class ExpressionControl
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -39,35 +39,21 @@ namespace AlgebraicTermRewriterWinforms.Controls
 		/// </summary>
 		private void InitializeComponent()
 		{
-			expressionLHS = new ExpressionControl();
-			expressionRHS = new ExpressionControl();
+			flowExpression = new FlowLayoutPanel();
 			tableLayoutPanel1 = new TableLayoutPanel();
-			flowEquation = new FlowLayoutPanel();
 			tableLayoutPanel1.SuspendLayout();
-			flowEquation.SuspendLayout();
 			SuspendLayout();
 			// 
-			// expressionLHS
+			// flowExpression
 			// 
-			expressionLHS.AutoSize = true;
-			expressionLHS.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			expressionLHS.Location = new Point(0, 0);
-			expressionLHS.Margin = new Padding(0);
-			expressionLHS.MinimumSize = new Size(11, 35);
-			expressionLHS.Name = "expressionLHS";
-			expressionLHS.Size = new Size(11, 35);
-			expressionLHS.TabIndex = 0;
-			// 
-			// expressionRHS
-			// 
-			expressionRHS.AutoSize = true;
-			expressionRHS.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			expressionRHS.Location = new Point(25, 0);
-			expressionRHS.Margin = new Padding(0);
-			expressionRHS.MinimumSize = new Size(11, 35);
-			expressionRHS.Name = "expressionRHS";
-			expressionRHS.Size = new Size(11, 35);
-			expressionRHS.TabIndex = 3;
+			flowExpression.AutoSize = true;
+			flowExpression.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			flowExpression.Location = new Point(0, 0);
+			flowExpression.Margin = new Padding(0);
+			flowExpression.MinimumSize = new Size(6, 35);
+			flowExpression.Name = "flowExpression";
+			flowExpression.Size = new Size(6, 35);
+			flowExpression.TabIndex = 0;
 			// 
 			// tableLayoutPanel1
 			// 
@@ -75,51 +61,35 @@ namespace AlgebraicTermRewriterWinforms.Controls
 			tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
 			tableLayoutPanel1.ColumnCount = 1;
 			tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-			tableLayoutPanel1.Controls.Add(flowEquation, 0, 0);
+			tableLayoutPanel1.Controls.Add(flowExpression, 0, 0);
 			tableLayoutPanel1.Location = new Point(0, 0);
 			tableLayoutPanel1.Margin = new Padding(0);
 			tableLayoutPanel1.Name = "tableLayoutPanel1";
 			tableLayoutPanel1.RowCount = 1;
 			tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-			tableLayoutPanel1.Size = new Size(36, 35);
-			tableLayoutPanel1.TabIndex = 3;
+			tableLayoutPanel1.Size = new Size(6, 35);
+			tableLayoutPanel1.TabIndex = 1;
 			// 
-			// flowLayoutPanel1
-			// 
-			flowEquation.AutoSize = true;
-			flowEquation.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			flowEquation.Controls.Add(expressionLHS);
-			flowEquation.Controls.Add(expressionRHS);
-			flowEquation.Location = new Point(0, 0);
-			flowEquation.Margin = new Padding(0);
-			flowEquation.Name = "flowLayoutPanel1";
-			flowEquation.Size = new Size(36, 35);
-			flowEquation.TabIndex = 0;
-			flowEquation.WrapContents = false;
-			// 
-			// EquationControl
+			// ExpressionControl
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			AutoSize = true;
 			AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			BorderStyle = BorderStyle.FixedSingle;
 			Controls.Add(tableLayoutPanel1);
 			Margin = new Padding(0);
-			Name = "EquationControl";
-			Size = new Size(36, 35);
+			MinimumSize = new Size(6, 35);
+			Name = "ExpressionControl";
+			Size = new Size(6, 35);
 			tableLayoutPanel1.ResumeLayout(false);
 			tableLayoutPanel1.PerformLayout();
-			flowEquation.ResumeLayout(false);
-			flowEquation.PerformLayout();
 			ResumeLayout(false);
 			PerformLayout();
 		}
 
 		#endregion
+
+		private FlowLayoutPanel flowExpression;
 		private TableLayoutPanel tableLayoutPanel1;
-		private ExpressionControl expressionLHS;
-		private ExpressionControl expressionRHS;
-		private FlowLayoutPanel flowEquation;
 	}
 }

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AlgebraicTermRewriter
 {
@@ -35,14 +36,12 @@ namespace AlgebraicTermRewriter
 				throw new ArgumentException($"{nameof(equationText)} cannot be null, empty or whitespace.");
 			}
 
-			if (equationText.Any(c => Types.Comparison.Contains(c)))
+			if (!equationText.Any(c => Types.Comparison.Contains(c)))
 			{
-				return MathParser.ParseEquation(equationText);
+				throw new Exception($"{nameof(equationText)} does not contain an equality or comparison operator (=, >, <, >=, <=), which is what defines an {nameof(Equation)}. Perhaps you meant to parse it as an {nameof(Expression)} instead? {nameof(equationText)}: \"{equationText}\".");
 			}
-			else
-			{
-				throw new Exception($"{nameof(equationText)} does not contain an equality or comparison operator (=, >, <, >=, <=), which is what defines an {nameof(Equation)}. Perhaps you meant to parse it as an {nameof(Expression)} instead?");
-			}
+
+			return MathParser.ParseEquation(equationText);
 		}
 
 		public Equation Simplify()

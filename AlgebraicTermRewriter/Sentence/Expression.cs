@@ -12,7 +12,7 @@ namespace AlgebraicTermRewriter
 	/// <summary>
 	/// An expression consists of a mathematical statement with or without variables, but does not contain an equality or inequality symbol.	/// 
 	/// </summary>
-	public class Expression : ISentence, ICloneable<Expression>
+	public class Expression : List<IToken>, ISentence, ICloneable<Expression>
 	{
 		public static Expression Empty = new Expression();
 		public IEnumerable<IOperator> Operators { get { return Tokens.Where(e => e.Type == TokenType.Operator).Select(e => (e as IOperator)); } }
@@ -21,8 +21,7 @@ namespace AlgebraicTermRewriter
 		public IEnumerable<SubExpression> SubExpressions { get { return Tokens.Where(e => e.Type == TokenType.Subexpression).Select(e => (e as SubExpression)); } }
 		public IEnumerable<ITerm> Terms { get { return Tokens.Where(e => e.Type == TokenType.Number || e.Type == TokenType.Variable).Select(e => (e as ITerm)); } }
 
-		public IEnumerable<IToken> Tokens { get { return _tokens.AsEnumerable(); } }
-		private List<IToken> _tokens = null;
+		public IEnumerable<IToken> Tokens { get { return this.AsEnumerable(); } }
 
 		public Equation Parent { get; set; }
 
@@ -34,7 +33,6 @@ namespace AlgebraicTermRewriter
 				Equation parentEquation = this.Parent;
 				if (parentEquation != null && !Equation.Equals(parentEquation, Equation.Empty))
 				{
-
 					if (Expression.Equals(this, parentEquation.LeftHandSide))
 					{
 						result = RelativeDirection.Left;
@@ -63,15 +61,14 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
-		private Expression()
+		public Expression()
+			: base()
 		{
-			_tokens = new List<IToken>();
 		}
 
-		public Expression(IToken[] tokens)
-			: this()
+		public Expression(IEnumerable<IToken> tokens)
+			: base(tokens)
 		{
-			_tokens.AddRange(tokens);
 		}
 
 		public static Expression Parse(string expressionText)
@@ -83,29 +80,22 @@ namespace AlgebraicTermRewriter
 
 			if (expressionText.Any(c => Types.Comparison.Contains(c)))
 			{
-				throw new Exception($"{nameof(expressionText)} contains an equality or comparison operator (=, >, <, >=, <=). Perhaps you meant to parse it as an {nameof(Equation)} instead?");
+				throw new Exception($"{nameof(expressionText)} contains an equality or comparison operator (=, >, <, >=, <=). Perhaps you meant to parse it as an {nameof(Equation)} instead? {nameof(expressionText)}: \"{expressionText}\".");
 			}
-			else
-			{
-				return MathParser.ParseExpression(expressionText);
-			}
+
+			return MathParser.ParseExpression(expressionText);
 		}
 
 		public Expression Simplify()
 		{
-			if (this._tokens.CanSimplify())
+			if (this.CanSimplify())
 			{
 				return Expression.Parse(InfixNotationEvaluator.Evaluate(this.ToString()).ToString());
 			}
 			return this;
 		}
 
-		public bool CanSimplify()
-		{
-			return this._tokens.CanSimplify();
-		}
-
-		public bool Contains(IToken token)
+		public new bool Contains(IToken token)
 		{
 			return Tokens.Any(tok => IToken.Equals(tok, token));
 		}
@@ -125,44 +115,39 @@ namespace AlgebraicTermRewriter
 			return Tokens.ElementAt(index);
 		}
 
-		internal void AddToken(IToken newToken)
+		public void AddToken(IToken newToken)
 		{
 			IToken clone = newToken.Clone();
-			_tokens.Add(clone);
+			this.Add(clone);
 		}
 
-		internal void ReplaceAt(int index, IToken replacementToken)
+		public void ReplaceAt(int index, IToken replacementToken)
 		{
 			IToken clone = replacementToken.Clone();
-			_tokens.RemoveAt(index);
-			_tokens.Insert(index, clone);
+			this.RemoveAt(index);
+			this.Insert(index, clone);
 		}
 
-		internal void RemoveAt(int index)
-		{
-			_tokens.RemoveAt(index);
-		}
-
-		internal void Remove(IToken token)
+		public new void Remove(IToken token)
 		{
 			int index = IndexOf(token);
 			if (index != -1)
 			{
-				_tokens.RemoveAt(index);
+				this.RemoveAt(index);
 			}
 		}
 
-		internal int RemoveAll(IToken token)
+		public int RemoveAll(IToken token)
 		{
-			return _tokens.RemoveAll(t => IToken.Equals(t, token));
+			return this.RemoveAll(t => IToken.Equals(t, token));
 		}
 
-		internal void RemoveRange(Range range)
+		public void RemoveRange(Range range)
 		{
 			RemoveRange(range.StartIndex, range.Count);
 		}
 
-		internal void RemoveRange(int start, int count)
+		public new void RemoveRange(int start, int count)
 		{
 			int[] indices = Enumerable.Range(start, count).Reverse().ToArray();
 			foreach (int index in indices)
@@ -171,9 +156,9 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
-		internal int IndexOf(IToken token)
+		public new int IndexOf(IToken token)
 		{
-			return _tokens.FindIndex(t => IToken.Equals(t, token));
+			return this.FindIndex(t => IToken.Equals(t, token));
 		}
 
 		public void Insert(OperatorExpressionPair pair)
@@ -194,25 +179,14 @@ namespace AlgebraicTermRewriter
 			}
 		}
 
-		public void Add(IToken item)
-		{
-			_tokens.Add(item);
-		}
-
 		public void AddRange(SubExpression collection)
 		{
-			_tokens.AddRange(collection);
-		}
-
-		public void Insert(int index, IToken item)
-		{
-			IToken clone = item.Clone();
-			_tokens.Insert(index, clone);
+			this.AddRange(collection.AsEnumerable());
 		}
 
 		public void InsertRange(int index, SubExpression collection)
 		{
-			_tokens.InsertRange(index, collection.AsEnumerable());
+			this.InsertRange(index, collection.AsEnumerable());
 		}
 
 		/// <summary>
@@ -316,7 +290,7 @@ namespace AlgebraicTermRewriter
 
 		public override string ToString()
 		{
-			return string.Join(" ", _tokens.Select(e => e.ToString()));
+			return string.Join(" ", this.Select(e => e.ToString()));
 		}
 	}
 }

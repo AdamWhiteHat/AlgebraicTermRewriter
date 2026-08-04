@@ -31,26 +31,16 @@ namespace AlgebraicTermRewriterWinforms
 		private void InitializeComponent()
 		{
 			components = new System.ComponentModel.Container();
-			equationControl1 = new AlgebraicTermRewriterWinforms.Controls.EquationControl();
 			textBoxInput = new System.Windows.Forms.TextBox();
 			buttonGo = new System.Windows.Forms.Button();
 			label1 = new System.Windows.Forms.Label();
 			errorProviderInput = new System.Windows.Forms.ErrorProvider(components);
+			expressionControl1 = new AlgebraicTermRewriterWinforms.Controls.ExpressionControl();
+			subExpressionControl1 = new AlgebraicTermRewriterWinforms.Controls.SubExpressionControl();
+			numberControl1 = new AlgebraicTermRewriterWinforms.Controls.NumberControl();
+			equationControl1 = new AlgebraicTermRewriterWinforms.Controls.EquationControl();
 			((System.ComponentModel.ISupportInitialize)errorProviderInput).BeginInit();
 			SuspendLayout();
-			// 
-			// equationControl1
-			// 
-			equationControl1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom;
-			equationControl1.AutoSize = true;
-			equationControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			equationControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			equationControl1.Location = new System.Drawing.Point(119, 87);
-			equationControl1.Margin = new System.Windows.Forms.Padding(0);
-			equationControl1.Name = "equationControl1";
-			equationControl1.Padding = new System.Windows.Forms.Padding(3);
-			equationControl1.Size = new System.Drawing.Size(94, 49);
-			equationControl1.TabIndex = 0;
 			// 
 			// textBoxInput
 			// 
@@ -58,7 +48,7 @@ namespace AlgebraicTermRewriterWinforms
 			textBoxInput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			textBoxInput.Location = new System.Drawing.Point(28, 35);
 			textBoxInput.Name = "textBoxInput";
-			textBoxInput.Size = new System.Drawing.Size(210, 21);
+			textBoxInput.Size = new System.Drawing.Size(556, 21);
 			textBoxInput.TabIndex = 1;
 			textBoxInput.Text = "(X + 45) * 7 = 21";
 			textBoxInput.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -67,7 +57,7 @@ namespace AlgebraicTermRewriterWinforms
 			// buttonGo
 			// 
 			buttonGo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-			buttonGo.Location = new System.Drawing.Point(244, 32);
+			buttonGo.Location = new System.Drawing.Point(590, 32);
 			buttonGo.Name = "buttonGo";
 			buttonGo.Size = new System.Drawing.Size(75, 25);
 			buttonGo.TabIndex = 2;
@@ -88,16 +78,69 @@ namespace AlgebraicTermRewriterWinforms
 			// 
 			errorProviderInput.ContainerControl = this;
 			// 
+			// expressionControl1
+			// 
+			expressionControl1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom;
+			expressionControl1.AutoSize = true;
+			expressionControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			expressionControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			expressionControl1.Location = new System.Drawing.Point(330, 116);
+			expressionControl1.Margin = new System.Windows.Forms.Padding(0);
+			expressionControl1.MinimumSize = new System.Drawing.Size(13, 35);
+			expressionControl1.Name = "expressionControl1";
+			expressionControl1.Size = new System.Drawing.Size(13, 37);
+			expressionControl1.TabIndex = 4;
+			// 
+			// subExpressionControl1
+			// 
+			subExpressionControl1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom;
+			subExpressionControl1.AutoSize = true;
+			subExpressionControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			subExpressionControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			subExpressionControl1.Location = new System.Drawing.Point(321, 165);
+			subExpressionControl1.Margin = new System.Windows.Forms.Padding(0);
+			subExpressionControl1.MinimumSize = new System.Drawing.Size(13, 35);
+			subExpressionControl1.Name = "subExpressionControl1";
+			subExpressionControl1.Size = new System.Drawing.Size(30, 37);
+			subExpressionControl1.TabIndex = 5;
+			// 
+			// numberControl1
+			// 
+			numberControl1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom;
+			numberControl1.AutoSize = true;
+			numberControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			numberControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			numberControl1.Location = new System.Drawing.Point(325, 214);
+			numberControl1.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+			numberControl1.Name = "numberControl1";
+			numberControl1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
+			numberControl1.Size = new System.Drawing.Size(22, 37);
+			numberControl1.TabIndex = 6;
+			// 
+			// equationControl1
+			// 
+			equationControl1.AutoSize = true;
+			equationControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			equationControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			equationControl1.Location = new System.Drawing.Point(321, 65);
+			equationControl1.Margin = new System.Windows.Forms.Padding(0);
+			equationControl1.Name = "equationControl1";
+			equationControl1.Size = new System.Drawing.Size(34, 43);
+			equationControl1.TabIndex = 7;
+			// 
 			// MainForm
 			// 
 			AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			ClientSize = new System.Drawing.Size(332, 159);
+			ClientSize = new System.Drawing.Size(678, 271);
+			Controls.Add(equationControl1);
+			Controls.Add(numberControl1);
+			Controls.Add(subExpressionControl1);
+			Controls.Add(expressionControl1);
 			Controls.Add(label1);
 			Controls.Add(buttonGo);
 			Controls.Add(textBoxInput);
-			Controls.Add(equationControl1);
-			MaximumSize = new System.Drawing.Size(1900, 200);
+			MaximumSize = new System.Drawing.Size(1900, 500);
 			MinimumSize = new System.Drawing.Size(350, 200);
 			Name = "MainForm";
 			Padding = new System.Windows.Forms.Padding(10);
@@ -108,11 +151,13 @@ namespace AlgebraicTermRewriterWinforms
 		}
 
 		#endregion
-
-		private Controls.EquationControl equationControl1;
 		private System.Windows.Forms.TextBox textBoxInput;
 		private System.Windows.Forms.Button buttonGo;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ErrorProvider errorProviderInput;
+		private Controls.NumberControl numberControl1;
+		private Controls.SubExpressionControl subExpressionControl1;
+		private Controls.ExpressionControl expressionControl1;
+		private Controls.EquationControl equationControl1;
 	}
 }

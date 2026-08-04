@@ -13,6 +13,7 @@ namespace AlgebraicTermRewriterWinforms.Controls
 {
 	public partial class NumberControl : UserControl
 	{
+		[DefaultValue(null)]
 		public Number Number
 		{
 			get
@@ -27,15 +28,6 @@ namespace AlgebraicTermRewriterWinforms.Controls
 		}
 		private Number _number = null;
 
-		private string otherSide = string.Empty;
-		private string menuItemText = "&Move to other side";
-		private static string menuItemTextFormat = "&Move to {0}HS";
-
-		private Control? parentControl = null;
-		private FlowLayoutPanel flowLayoutPanel = null;
-		private Expression parentExpression = null;
-		private Equation parentEquation = null;
-		private RelativeDirection? parentExpressionLocation = null;
 		public NumberControl()
 		{
 			InitializeComponent();
@@ -49,6 +41,13 @@ namespace AlgebraicTermRewriterWinforms.Controls
 
 		protected virtual void PopulateControl()
 		{
+			if (_number == null)
+			{
+				labelNumber.Text = "";
+				labelNumber.Tag = null;
+				return;
+			}
+
 			labelNumber.Text = _number.ToString();
 			labelNumber.Tag = _number;
 		}
@@ -56,21 +55,30 @@ namespace AlgebraicTermRewriterWinforms.Controls
 		protected override void OnParentChanged(EventArgs e)
 		{
 			base.OnParentChanged(e);
-
 			SetContextMenuText();
 		}
+
+		private string otherSide = string.Empty;
+		private string menuItemText = "&Move to other side";
+		private static string menuItemTextFormat = "&Move to {0}HS";
+
+		private Control parentControl = null;
+		private Expression parentExpression = null;
+		private EquationControl parentEquationControl = null;
+		private Equation parentEquation = null;
+		private RelativeDirection? thisExpressionLocation = null;
 
 		private void SetContextMenuText()
 		{
 			SetPrivateVariables();
 
-			if (parentExpressionLocation.HasValue)
+			if (thisExpressionLocation.HasValue)
 			{
-				if (parentExpressionLocation == RelativeDirection.Left)
+				if (thisExpressionLocation == RelativeDirection.Left)
 				{
 					otherSide = "R";
 				}
-				else if (parentExpressionLocation == RelativeDirection.Right)
+				else if (thisExpressionLocation == RelativeDirection.Right)
 				{
 					otherSide = "L";
 				}
@@ -82,34 +90,33 @@ namespace AlgebraicTermRewriterWinforms.Controls
 
 		private void SetPrivateVariables()
 		{
-			parentControl = this.Parent;
+			Control parentControl = ControlsHelper.GetFirstParentControlOfType(this, new List<Type> { typeof(SubExpressionControl), typeof(ExpressionControl) });
 			if (parentControl == null)
 			{
 				return;
 			}
 
-			flowLayoutPanel = parentControl as FlowLayoutPanel;
-			if (flowLayoutPanel == null)
+			SubExpressionControl subExprCtrl = parentControl as SubExpressionControl;
+			ExpressionControl exprCtrl = parentControl as ExpressionControl;
+			if (subExprCtrl != null)
 			{
-				return;
+				parentExpression = subExprCtrl.Subexpression;
+			}
+			else if (exprCtrl != null)
+			{
+				parentExpression = exprCtrl.Expression;
 			}
 
-			parentExpression = flowLayoutPanel.Tag as Expression;
-			if (parentExpression == null)
+			parentEquationControl = ControlsHelper.GetParentControlOfType<EquationControl>(this);
+			if (parentEquationControl != null)
 			{
-				return;
+				parentEquation = parentEquationControl.Equation;
 			}
 
-			parentEquation = parentExpression.Parent;
-			if (parentEquation == null)
+			thisExpressionLocation = parentExpression.SideOfEquality;
+			if (!thisExpressionLocation.HasValue)
 			{
 				return;
-			}
-
-			parentExpressionLocation = parentExpression.SideOfEquality;
-			if (!parentExpressionLocation.HasValue)
-			{
-				throw new Exception("Cannot find self (expression) in parent's LHS or RHS?!");
 			}
 		}
 
@@ -117,10 +124,6 @@ namespace AlgebraicTermRewriterWinforms.Controls
 		{
 			SetPrivateVariables();
 
-			if (flowLayoutPanel == null)
-			{
-				return;
-			}
 			if (parentExpression == null)
 			{
 				return;
@@ -129,30 +132,27 @@ namespace AlgebraicTermRewriterWinforms.Controls
 			{
 				return;
 			}
-			if (!parentExpressionLocation.HasValue)
+			if (parentEquationControl == null)
 			{
-				throw new Exception("Cannot find self (expression) in parent's LHS or RHS?!");
+				return;
+			}
+			if (!thisExpressionLocation.HasValue)
+			{
+				return;
 			}
 
 			OperatorExpressionPair opVariablePair = parentExpression.Extract(Number);
 
-			if (parentExpressionLocation == RelativeDirection.Left)
+			if (thisExpressionLocation == RelativeDirection.Left)
 			{
 				parentEquation.RightHandSide.Insert(opVariablePair);
 			}
-			else if (parentExpressionLocation == RelativeDirection.Right)
+			else if (thisExpressionLocation == RelativeDirection.Right)
 			{
 				parentEquation.LeftHandSide.Insert(opVariablePair);
 			}
 
-			Control tableLayoutPanel = flowLayoutPanel.Parent;
-			Control equationControl = tableLayoutPanel.Parent;
-
-			EquationControl equationControl1 = equationControl as EquationControl;
-			if (equationControl1 != null)
-			{
-				equationControl1.Refresh();
-			}
+			parentEquationControl.ReDraw();
 		}
 	}
 }

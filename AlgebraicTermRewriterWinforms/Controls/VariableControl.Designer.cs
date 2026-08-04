@@ -41,11 +41,11 @@ namespace AlgebraicTermRewriterWinforms.Controls
 			// 
 			labelVariable.AutoSize = true;
 			labelVariable.ContextMenuStrip = contextMenu;
-			labelVariable.Location = new System.Drawing.Point(3, 3);
+			labelVariable.Location = new System.Drawing.Point(0, 0);
 			labelVariable.Margin = new Padding(0);
+			labelVariable.MinimumSize = new System.Drawing.Size(6, 35);
 			labelVariable.Name = "labelVariable";
-			labelVariable.Padding = new Padding(3);
-			labelVariable.Size = new System.Drawing.Size(21, 21);
+			labelVariable.Size = new System.Drawing.Size(15, 35);
 			labelVariable.TabIndex = 0;
 			labelVariable.Text = "X";
 			labelVariable.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -56,6 +56,7 @@ namespace AlgebraicTermRewriterWinforms.Controls
 			contextMenu.Name = "contextMenu";
 			contextMenu.ShowImageMargin = false;
 			contextMenu.Size = new System.Drawing.Size(164, 48);
+			contextMenu.Click += menuItem_MoveToOtherSide_Click;
 			// 
 			// menuItem_MoveToOtherSide
 			// 
@@ -75,9 +76,9 @@ namespace AlgebraicTermRewriterWinforms.Controls
 			AutoSizeMode = AutoSizeMode.GrowAndShrink;
 			ContextMenuStrip = contextMenu;
 			Controls.Add(labelVariable);
+			Margin = new Padding(0);
 			Name = "VariableControl";
-			Padding = new Padding(3);
-			Size = new System.Drawing.Size(27, 30);
+			Size = new System.Drawing.Size(15, 35);
 			contextMenu.ResumeLayout(false);
 			ResumeLayout(false);
 			PerformLayout();

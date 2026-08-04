@@ -5,17 +5,38 @@ using System.Collections.Generic;
 
 namespace AlgebraicTermRewriter
 {
-	public class SubExpression : List<IToken>, IToken
+	public class SubExpression : Expression, IToken
 	{
+		public static SubExpression Empty = new SubExpression();
 		public string Contents { get { return this.ToString(); } }
 		public TokenType Type { get { return TokenType.Subexpression; } }
 
 		public SubExpression()
 			: base()
 		{ }
-		public SubExpression(IToken[] tokens)
+
+		public SubExpression(IEnumerable<IToken> tokens)
 			: base(tokens)
 		{ }
+
+		public static SubExpression Parse(string subexpressionText)
+		{
+			if (string.IsNullOrWhiteSpace(subexpressionText))
+			{
+				throw new ArgumentException($"{nameof(subexpressionText)} cannot be null, empty or whitespace.");
+			}
+
+			if (subexpressionText.Any(c => Types.Comparison.Contains(c)))
+			{
+				throw new Exception($"{nameof(subexpressionText)} contains an equality or comparison operator (=, >, <, >=, <=). Perhaps you meant to parse it as an {nameof(Equation)} instead? {nameof(subexpressionText)}: \"{subexpressionText}\".");
+			}
+
+			Stack<char> stack = new Stack<char>(subexpressionText.Replace(" ", "").Reverse());
+
+			IEnumerable<IToken> tokens = MathParser.ParseExpression(stack);
+
+			return new SubExpression(tokens.ToArray());
+		}
 
 		public bool Equals(IToken? other)
 		{

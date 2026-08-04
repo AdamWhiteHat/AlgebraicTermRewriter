@@ -13,6 +13,7 @@ namespace AlgebraicTermRewriterWinforms.Controls
 {
 	public partial class TokenControl : UserControl
 	{
+		[DefaultValue(null)]
 		public IToken Token
 		{
 			get
@@ -40,6 +41,13 @@ namespace AlgebraicTermRewriterWinforms.Controls
 
 		protected virtual void PopulateControl()
 		{
+			if (_token == null)
+			{
+				labelToken.Text = "";
+				labelToken.Tag = null;
+				return;
+			}
+
 			labelToken.Text = _token.ToString();
 			labelToken.Tag = _token;
 		}

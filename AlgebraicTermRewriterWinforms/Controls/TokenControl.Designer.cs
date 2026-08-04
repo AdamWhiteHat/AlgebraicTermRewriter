@@ -34,11 +34,11 @@
 			// labelToken
 			// 
 			labelToken.AutoSize = true;
-			labelToken.Location = new System.Drawing.Point(3, 3);
+			labelToken.Location = new System.Drawing.Point(0, 0);
 			labelToken.Margin = new System.Windows.Forms.Padding(0);
+			labelToken.MinimumSize = new System.Drawing.Size(6, 35);
 			labelToken.Name = "labelToken";
-			labelToken.Padding = new System.Windows.Forms.Padding(3);
-			labelToken.Size = new System.Drawing.Size(20, 21);
+			labelToken.Size = new System.Drawing.Size(14, 35);
 			labelToken.TabIndex = 0;
 			labelToken.Text = "1";
 			labelToken.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -50,9 +50,9 @@
 			AutoSize = true;
 			AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			Controls.Add(labelToken);
+			Margin = new System.Windows.Forms.Padding(0);
 			Name = "TokenControl";
-			Padding = new System.Windows.Forms.Padding(3);
-			Size = new System.Drawing.Size(26, 27);
+			Size = new System.Drawing.Size(14, 35);
 			ResumeLayout(false);
 			PerformLayout();
 		}

@@ -38,6 +38,9 @@ namespace AlgebraicTermRewriterWinforms
 		{
 			ClearErrors();
 			equationControl1.Equation = Equation.Empty;
+			expressionControl1.Expression = Expression.Empty;
+			subExpressionControl1.Subexpression = SubExpression.Empty;
+			numberControl1.Number = new Number(0);
 
 			string input = textBoxInput.Text;
 			if (string.IsNullOrWhiteSpace(input))
@@ -56,6 +59,27 @@ namespace AlgebraicTermRewriterWinforms
 			Equation eq = Equation.Parse(input);
 			equationControl1.Equation = eq;
 			CenterControl(equationControl1);
+
+			expressionControl1.Expression = eq.LeftHandSide;
+			CenterControl(expressionControl1);
+
+			Expression ex = eq.LeftHandSide;
+
+			var subExpr = ex.SubExpressions.FirstOrDefault();
+			if (subExpr == null)
+			{
+				return;
+			}
+
+			subExpressionControl1.Subexpression = subExpr;
+			CenterControl(subExpressionControl1);
+
+			var num = subExpr.Where(t => t.Type == TokenType.Number).FirstOrDefault() as Number;
+			if (num != null)
+			{
+				numberControl1.Number = num;
+				CenterControl(numberControl1);
+			}
 		}
 
 		private void CenterControl(Control control)
